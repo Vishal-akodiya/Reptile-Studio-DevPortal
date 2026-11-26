@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,7 +9,9 @@
   <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -46,76 +49,100 @@
       scrollbar-width: thin;
       scrollbar-color: #27272a #09090b;
     }
+
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
+
     ::-webkit-scrollbar-track {
       background: #09090b;
     }
+
     ::-webkit-scrollbar-thumb {
       background: #27272a;
       border-radius: 9999px;
     }
+
     ::-webkit-scrollbar-thumb:hover {
       background: #3f3f46;
     }
+
     .portal-grid {
       background-image:
         linear-gradient(to right, rgba(39, 39, 42, 0.28) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(39, 39, 42, 0.28) 1px, transparent 1px);
       background-size: 40px 40px;
     }
+
     .kanban-card-dragging {
       opacity: 0.45;
       transform: scale(0.98);
     }
+
     .kanban-drop-active {
       border-color: rgba(16, 185, 129, 0.6) !important;
       background-color: rgba(16, 185, 129, 0.06) !important;
     }
+
     @keyframes fadeSlideUp {
       from {
         opacity: 0;
         transform: translateY(6px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
       }
     }
+
     .animate-in {
       animation: fadeSlideUp 0.16s ease-out forwards;
     }
   </style>
 </head>
-<body class="bg-[#09090b] text-zinc-100 font-sans antialiased selection:bg-emerald-500/30 selection:text-emerald-200 overflow-x-hidden">
+
+<body
+  class="bg-[#09090b] text-zinc-100 font-sans antialiased selection:bg-emerald-500/30 selection:text-emerald-200 overflow-x-hidden">
 
   <!-- ==================== 0. INITIAL BOOT LOADER ==================== -->
   <div id="boot-view" class="min-h-screen w-full flex flex-col items-center justify-center bg-[#09090b] p-6">
     <div class="w-11 h-11 rounded-xl bg-[#0f1014] border border-[#27272a] flex items-center justify-center mb-4">
-      <svg class="w-6 h-6" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Reptile Studio Emblem">
-        <path d="M16 2.5L28 9.25V22.75L16 29.5L4 22.75V9.25L16 2.5Z" stroke="#3f3f46" stroke-width="1.5" fill="#14151a"/>
-        <path d="M8.5 16C10.8 12.1 13.4 10.5 16 10.5C18.6 10.5 21.2 12.1 23.5 16C21.2 19.9 18.6 21.5 16 21.5C13.4 21.5 10.8 19.9 8.5 16Z" stroke="#10b981" stroke-width="1.7" stroke-linejoin="round"/>
-        <path d="M16 12.2L17.3 16L16 19.8L14.7 16L16 12.2Z" fill="#34d399"/>
+      <svg class="w-6 h-6" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
+        aria-label="Reptile Studio Emblem">
+        <path d="M16 2.5L28 9.25V22.75L16 29.5L4 22.75V9.25L16 2.5Z" stroke="#3f3f46" stroke-width="1.5"
+          fill="#14151a" />
+        <path
+          d="M8.5 16C10.8 12.1 13.4 10.5 16 10.5C18.6 10.5 21.2 12.1 23.5 16C21.2 19.9 18.6 21.5 16 21.5C13.4 21.5 10.8 19.9 8.5 16Z"
+          stroke="#10b981" stroke-width="1.7" stroke-linejoin="round" />
+        <path d="M16 12.2L17.3 16L16 19.8L14.7 16L16 12.2Z" fill="#34d399" />
       </svg>
     </div>
     <p class="text-xs font-mono text-zinc-500 tracking-wider uppercase">Initializing Reptile Studio Portal...</p>
   </div>
 
   <!-- ==================== 1. AUTHENTICATION & SUPABASE SETUP VIEW ==================== -->
-  <div id="login-view" class="hidden min-h-screen w-full relative flex items-center justify-center p-4 sm:p-6 bg-[#09090b]">
+  <div id="login-view"
+    class="hidden min-h-screen w-full relative flex items-center justify-center p-4 sm:p-6 bg-[#09090b]">
     <div class="absolute inset-0 portal-grid pointer-events-none opacity-60"></div>
-    <div class="absolute inset-0 bg-gradient-to-b from-emerald-500/[0.05] via-transparent to-[#09090b] pointer-events-none"></div>
+    <div
+      class="absolute inset-0 bg-gradient-to-b from-emerald-500/[0.05] via-transparent to-[#09090b] pointer-events-none">
+    </div>
 
     <div class="relative z-10 w-full max-w-[430px] space-y-4 animate-in">
       <!-- Brand Header -->
       <div class="flex flex-col items-center text-center mb-2">
-        <div class="w-12 h-12 rounded-xl bg-[#0f1014] border border-[#27272a] flex items-center justify-center mb-3.5 shadow-lg shadow-black/40">
-          <svg class="w-7 h-7" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Reptile Studio Emblem">
-            <path d="M16 2.5L28 9.25V22.75L16 29.5L4 22.75V9.25L16 2.5Z" stroke="#3f3f46" stroke-width="1.5" fill="#14151a"/>
-            <path d="M8.5 16C10.8 12.1 13.4 10.5 16 10.5C18.6 10.5 21.2 12.1 23.5 16C21.2 19.9 18.6 21.5 16 21.5C13.4 21.5 10.8 19.9 8.5 16Z" stroke="#10b981" stroke-width="1.7" stroke-linejoin="round"/>
-            <path d="M16 12.2L17.3 16L16 19.8L14.7 16L16 12.2Z" fill="#34d399"/>
+        <div
+          class="w-12 h-12 rounded-xl bg-[#0f1014] border border-[#27272a] flex items-center justify-center mb-3.5 shadow-lg shadow-black/40">
+          <svg class="w-7 h-7" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
+            aria-label="Reptile Studio Emblem">
+            <path d="M16 2.5L28 9.25V22.75L16 29.5L4 22.75V9.25L16 2.5Z" stroke="#3f3f46" stroke-width="1.5"
+              fill="#14151a" />
+            <path
+              d="M8.5 16C10.8 12.1 13.4 10.5 16 10.5C18.6 10.5 21.2 12.1 23.5 16C21.2 19.9 18.6 21.5 16 21.5C13.4 21.5 10.8 19.9 8.5 16Z"
+              stroke="#10b981" stroke-width="1.7" stroke-linejoin="round" />
+            <path d="M16 12.2L17.3 16L16 19.8L14.7 16L16 12.2Z" fill="#34d399" />
           </svg>
         </div>
         <h1 class="text-xl font-semibold tracking-tight text-zinc-100">Reptile Studio</h1>
@@ -123,10 +150,12 @@
       </div>
 
       <!-- Optional Supabase Project Connection Card (Shown only when not hardcoded in file) -->
-      <div id="supabase-config-card" class="hidden bg-[#0f1014] border border-emerald-500/30 rounded-xl p-5 shadow-2xl shadow-black/50">
+      <div id="supabase-config-card"
+        class="hidden bg-[#0f1014] border border-emerald-500/30 rounded-xl p-5 shadow-2xl shadow-black/50">
         <div class="flex items-start justify-between gap-3 mb-3">
           <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+            <div
+              class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
               <i data-lucide="database" class="w-3.5 h-3.5"></i>
             </div>
             <div>
@@ -134,7 +163,8 @@
               <p class="text-[11px] text-zinc-500">Test live in browser before hardcoding for deploy</p>
             </div>
           </div>
-          <button type="button" id="close-config-btn" onclick="toggleConfigPanel(false)" class="hidden p-1 text-zinc-500 hover:text-zinc-300 rounded">
+          <button type="button" id="close-config-btn" onclick="toggleConfigPanel(false)"
+            class="hidden p-1 text-zinc-500 hover:text-zinc-300 rounded">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
@@ -142,32 +172,21 @@
         <form id="supabase-config-form" class="space-y-3" autocomplete="off">
           <div>
             <label class="block text-[11px] font-medium text-zinc-400 mb-1">Project URL</label>
-            <input
-              id="cfg-sb-url"
-              type="url"
-              required
-              placeholder="https://xxxx.supabase.co"
-              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 placeholder-zinc-600 outline-none transition"
-            />
+            <input id="cfg-sb-url" type="url" required placeholder="https://xxxx.supabase.co"
+              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 placeholder-zinc-600 outline-none transition" />
           </div>
           <div>
             <label class="block text-[11px] font-medium text-zinc-400 mb-1">Publishable Key (or legacy anon key)</label>
-            <input
-              id="cfg-sb-key"
-              type="text"
-              required
-              placeholder="sb_publishable_... or eyJ..."
-              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 placeholder-zinc-600 outline-none transition"
-            />
+            <input id="cfg-sb-key" type="text" required placeholder="sb_publishable_... or eyJ..."
+              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 placeholder-zinc-600 outline-none transition" />
           </div>
           <div class="flex items-center justify-between gap-2 pt-1">
-            <button type="button" id="clear-config-btn" onclick="clearLocalSupabaseConfig()" class="hidden text-[11px] text-zinc-500 hover:text-red-400 transition">
+            <button type="button" id="clear-config-btn" onclick="clearLocalSupabaseConfig()"
+              class="hidden text-[11px] text-zinc-500 hover:text-red-400 transition">
               Reset saved keys
             </button>
-            <button
-              type="submit"
-              class="ml-auto px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs inline-flex items-center gap-1.5 transition"
-            >
+            <button type="submit"
+              class="ml-auto px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs inline-flex items-center gap-1.5 transition">
               <i data-lucide="plug" class="w-3.5 h-3.5"></i>
               Save &amp; Connect
             </button>
@@ -178,10 +197,12 @@
       <!-- Main Studio Login Card -->
       <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-6 shadow-2xl shadow-black/60">
         <!-- Connection Status Strip -->
-        <div id="login-conn-pill" class="mb-4 px-3 py-2 rounded-lg bg-[#14151a] border border-[#27272a] flex items-center justify-between gap-2">
+        <div id="login-conn-pill"
+          class="mb-4 px-3 py-2 rounded-lg bg-[#14151a] border border-[#27272a] flex items-center justify-between gap-2">
           <div class="flex items-center gap-2 min-w-0">
             <span id="login-conn-dot" class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
-            <span id="login-conn-text" class="text-[11px] font-mono text-zinc-400 truncate">Supabase not configured</span>
+            <span id="login-conn-text" class="text-[11px] font-mono text-zinc-400 truncate">Supabase not
+              configured</span>
           </div>
           <span class="text-[10px] font-mono text-zinc-600 shrink-0">LIVE AUTH</span>
         </div>
@@ -189,56 +210,70 @@
         <!-- Inline Error / Success Notice -->
         <div id="login-alert" class="hidden mb-4 px-3.5 py-2.5 rounded-lg text-xs flex items-start gap-2"></div>
 
+        <!-- OAuth Providers (Google & Discord) -->
+        <div id="oauth-section" class="space-y-2.5 mb-4">
+          <button id="oauth-google-btn" type="button" onclick="signInWithOAuthProvider('google')"
+            class="w-full bg-[#14151a] hover:bg-zinc-800/90 active:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed border border-[#27272a] hover:border-zinc-700 text-zinc-100 font-medium text-xs sm:text-sm py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2.5">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#4285F4"
+                d="M23.49 12.275c0-.85-.075-1.675-.215-2.475H12v4.685h6.445c-.28 1.495-1.125 2.765-2.395 3.615v3.005h3.875c2.265-2.085 3.565-5.16 3.565-8.83z" />
+              <path fill="#34A853"
+                d="M12 24c3.24 0 5.955-1.075 7.94-2.91l-3.875-3.005c-1.075.72-2.45 1.15-4.065 1.15-3.125 0-5.77-2.11-6.715-4.945H1.28v3.1C3.255 21.31 7.31 24 12 24z" />
+              <path fill="#FBBC05"
+                d="M5.285 14.29c-.24-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29v-3.1H1.28C.465 8.235 0 10.065 0 12s.465 3.765 1.28 5.39l4.005-3.1z" />
+              <path fill="#EA4335"
+                d="M12 4.765c1.76 0 3.34.605 4.585 1.795l3.435-3.435C17.95 1.19 15.235 0 12 0 7.31 0 3.255 2.69 1.28 6.61l4.005 3.1c.945-2.835 3.59-4.945 6.715-4.945z" />
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+
+          <button id="oauth-discord-btn" type="button" onclick="signInWithOAuthProvider('discord')"
+            class="w-full bg-[#5865F2] hover:bg-[#4752C4] active:bg-[#3C45A5] disabled:opacity-50 disabled:cursor-not-allowed border border-[#5865F2] text-white font-medium text-xs sm:text-sm py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2.5 shadow-sm shadow-[#5865F2]/20">
+            <svg class="w-4 h-4 shrink-0 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+            </svg>
+            <span>Continue with Discord</span>
+          </button>
+
+          <div class="relative py-1.5 flex items-center">
+            <div class="flex-grow border-t border-[#27272a]"></div>
+            <span class="shrink mx-3 text-[10px] font-mono uppercase tracking-wider text-zinc-500">or continue with
+              studio email</span>
+            <div class="flex-grow border-t border-[#27272a]"></div>
+          </div>
+        </div>
+
         <!-- Standard Sign In Form -->
         <form id="login-form" class="space-y-4">
           <div>
             <label for="login-email" class="block text-xs font-medium text-zinc-400 mb-1.5">Studio Email (Gmail)</label>
-            <input
-              id="login-email"
-              type="email"
-              required
-              autocomplete="email"
-              placeholder="name@gmail.com"
-              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/25 rounded-lg px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none transition"
-            />
+            <input id="login-email" type="email" required autocomplete="email" placeholder="name@gmail.com"
+              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/25 rounded-lg px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none transition" />
           </div>
 
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <label for="login-password" class="block text-xs font-medium text-zinc-400">Password</label>
-              <button
-                type="button"
-                onclick="toggleForgotMode(true)"
-                class="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium transition"
-              >
+              <button type="button" onclick="toggleForgotMode(true)"
+                class="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium transition">
                 Forgot password?
               </button>
             </div>
             <div class="relative">
-              <input
-                id="login-password"
-                type="password"
-                required
-                autocomplete="current-password"
+              <input id="login-password" type="password" required autocomplete="current-password"
                 placeholder="Enter your password"
-                class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/25 rounded-lg pl-3 pr-10 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none transition"
-              />
-              <button
-                type="button"
-                id="toggle-password-btn"
+                class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/25 rounded-lg pl-3 pr-10 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none transition" />
+              <button type="button" id="toggle-password-btn"
                 class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-300 transition rounded"
-                aria-label="Toggle password visibility"
-              >
+                aria-label="Toggle password visibility">
                 <i data-lucide="eye" class="w-4 h-4"></i>
               </button>
             </div>
           </div>
 
-          <button
-            id="login-submit-btn"
-            type="submit"
-            class="w-full bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-semibold text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2"
-          >
+          <button id="login-submit-btn" type="submit"
+            class="w-full bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-semibold text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2">
             <span>Sign In to Portal</span>
             <i data-lucide="arrow-right" class="w-4 h-4"></i>
           </button>
@@ -247,31 +282,22 @@
         <!-- Forgot Password Reset Form (Hidden by default) -->
         <form id="forgot-form" class="hidden space-y-4">
           <div class="text-xs text-zinc-400 leading-relaxed">
-            Enter your invited studio Gmail address. Supabase will send you a secure password recovery link that opens directly back into this portal.
+            Enter your invited studio Gmail address. Supabase will send you a secure password recovery link that opens
+            directly back into this portal.
           </div>
           <div>
-            <label for="forgot-email" class="block text-xs font-medium text-zinc-400 mb-1.5">Studio Email (Gmail)</label>
-            <input
-              id="forgot-email"
-              type="email"
-              required
-              placeholder="name@gmail.com"
-              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none transition"
-            />
+            <label for="forgot-email" class="block text-xs font-medium text-zinc-400 mb-1.5">Studio Email
+              (Gmail)</label>
+            <input id="forgot-email" type="email" required placeholder="name@gmail.com"
+              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none transition" />
           </div>
           <div class="flex items-center gap-2">
-            <button
-              type="button"
-              onclick="toggleForgotMode(false)"
-              class="px-3.5 py-2.5 rounded-lg bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-xs font-medium text-zinc-300 transition"
-            >
+            <button type="button" onclick="toggleForgotMode(false)"
+              class="px-3.5 py-2.5 rounded-lg bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-xs font-medium text-zinc-300 transition">
               Back
             </button>
-            <button
-              id="forgot-submit-btn"
-              type="submit"
-              class="flex-1 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold text-xs py-2.5 rounded-lg transition flex items-center justify-center gap-1.5"
-            >
+            <button id="forgot-submit-btn" type="submit"
+              class="flex-1 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold text-xs py-2.5 rounded-lg transition flex items-center justify-center gap-1.5">
               <i data-lucide="mail" class="w-3.5 h-3.5"></i>
               Send Recovery Email
             </button>
@@ -280,11 +306,8 @@
 
         <!-- Subtle Toggle for LocalStorage Connection (Hidden when hardcoded) -->
         <div id="change-conn-footer" class="hidden mt-5 pt-4 border-t border-[#27272a] text-center">
-          <button
-            type="button"
-            onclick="toggleConfigPanel(true)"
-            class="text-[11px] font-mono text-zinc-500 hover:text-emerald-400 transition inline-flex items-center gap-1.5"
-          >
+          <button type="button" onclick="toggleConfigPanel(true)"
+            class="text-[11px] font-mono text-zinc-500 hover:text-emerald-400 transition inline-flex items-center gap-1.5">
             <i data-lucide="settings-2" class="w-3 h-3"></i>
             Change Supabase Connection
           </button>
@@ -298,16 +321,20 @@
   </div>
 
   <!-- ==================== 2. NON-BLOCKING PROFILE ONBOARDING VIEW ==================== -->
-  <div id="profile-setup-view" class="hidden min-h-screen w-full relative flex items-center justify-center p-4 sm:p-6 bg-[#09090b]">
+  <div id="profile-setup-view"
+    class="hidden min-h-screen w-full relative flex items-center justify-center p-4 sm:p-6 bg-[#09090b]">
     <div class="absolute inset-0 portal-grid pointer-events-none opacity-50"></div>
-    <div class="relative z-10 w-full max-w-md bg-[#0f1014] border border-[#27272a] rounded-xl p-6 shadow-2xl shadow-black/60 animate-in">
+    <div
+      class="relative z-10 w-full max-w-md bg-[#0f1014] border border-[#27272a] rounded-xl p-6 shadow-2xl shadow-black/60 animate-in">
       <div class="flex items-center gap-3 mb-4">
-        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 shrink-0">
+        <div
+          class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 shrink-0">
           <i data-lucide="user-check" class="w-5 h-5"></i>
         </div>
         <div>
           <h2 class="text-base font-semibold text-zinc-100">Complete Your Studio Profile</h2>
-          <p class="text-xs text-zinc-400">Your auth login succeeded, but no <code class="font-mono text-emerald-400">public.profiles</code> row exists yet.</p>
+          <p class="text-xs text-zinc-400">Your auth login succeeded, but no <code
+              class="font-mono text-emerald-400">public.profiles</code> row exists yet.</p>
         </div>
       </div>
 
@@ -315,11 +342,8 @@
       <div class="mb-4 p-3 rounded-lg bg-[#09090b] border border-[#27272a]">
         <div class="flex items-center justify-between gap-2 mb-1">
           <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Your Auth User UID</span>
-          <button
-            type="button"
-            onclick="copyTextToClipboard(currentSession?.user?.id || '', 'User UID copied')"
-            class="text-[10px] font-mono text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1"
-          >
+          <button type="button" onclick="copyTextToClipboard(currentSession?.user?.id || '', 'User UID copied')"
+            class="text-[10px] font-mono text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1">
             <i data-lucide="copy" class="w-3 h-3"></i> Copy UID
           </button>
         </div>
@@ -330,26 +354,27 @@
       <form id="profile-setup-form" class="space-y-3.5">
         <div>
           <label class="block text-xs font-medium text-zinc-400 mb-1">Display Name *</label>
-          <input name="display_name" required placeholder="e.g., Vishal" class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none" />
+          <input name="display_name" required placeholder="e.g., Vishal"
+            class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none" />
         </div>
         <div>
           <label class="block text-xs font-medium text-zinc-400 mb-1">Short Handle (Username) *</label>
-          <input name="username" required placeholder="e.g., vishal" class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-sm font-mono text-zinc-100 outline-none" />
+          <input name="username" required placeholder="e.g., vishal"
+            class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-sm font-mono text-zinc-100 outline-none" />
         </div>
         <div>
           <label class="block text-xs font-medium text-zinc-400 mb-1">Studio Title / Discipline *</label>
-          <input name="studio_title" required placeholder="e.g., Lead Dev & Shaders" class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none" />
+          <input name="studio_title" required placeholder="e.g., Lead Dev & Shaders"
+            class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none" />
         </div>
 
         <div class="flex items-center justify-between gap-2 pt-2">
-          <button type="button" onclick="handleSignOut()" class="px-3.5 py-2.5 rounded-lg bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-xs font-medium text-zinc-400 hover:text-zinc-200 transition">
+          <button type="button" onclick="handleSignOut()"
+            class="px-3.5 py-2.5 rounded-lg bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-xs font-medium text-zinc-400 hover:text-zinc-200 transition">
             Sign Out
           </button>
-          <button
-            id="setup-profile-btn"
-            type="submit"
-            class="flex-1 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold text-xs py-2.5 px-4 rounded-lg transition inline-flex items-center justify-center gap-1.5"
-          >
+          <button id="setup-profile-btn" type="submit"
+            class="flex-1 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold text-xs py-2.5 px-4 rounded-lg transition inline-flex items-center justify-center gap-1.5">
             <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
             Create My Profile Now
           </button>
@@ -362,26 +387,35 @@
   <div id="app-shell" class="hidden min-h-screen w-full flex bg-[#09090b]">
 
     <!-- Mobile Sidebar Backdrop -->
-    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-30 hidden lg:hidden" onclick="toggleMobileSidebar(false)"></div>
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-30 hidden lg:hidden"
+      onclick="toggleMobileSidebar(false)"></div>
 
     <!-- Left Navigation Sidebar -->
-    <aside id="sidebar" class="fixed lg:sticky top-0 left-0 z-40 h-screen w-60 shrink-0 bg-[#0f1014] border-r border-[#27272a] flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out">
+    <aside id="sidebar"
+      class="fixed lg:sticky top-0 left-0 z-40 h-screen w-60 shrink-0 bg-[#0f1014] border-r border-[#27272a] flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out">
       <!-- Brand Header -->
       <div class="h-14 px-4 border-b border-[#27272a] flex items-center justify-between">
         <button type="button" onclick="navigateTo('overview')" class="flex items-center gap-2.5 text-left group">
-          <div class="w-7 h-7 rounded-lg bg-[#14151a] border border-[#27272a] flex items-center justify-center shrink-0">
+          <div
+            class="w-7 h-7 rounded-lg bg-[#14151a] border border-[#27272a] flex items-center justify-center shrink-0">
             <svg class="w-4 h-4" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 2.5L28 9.25V22.75L16 29.5L4 22.75V9.25L16 2.5Z" stroke="#3f3f46" stroke-width="1.8" fill="#09090b"/>
-              <path d="M8.5 16C10.8 12.1 13.4 10.5 16 10.5C18.6 10.5 21.2 12.1 23.5 16C21.2 19.9 18.6 21.5 16 21.5C13.4 21.5 10.8 19.9 8.5 16Z" stroke="#10b981" stroke-width="2" stroke-linejoin="round"/>
-              <path d="M16 12.2L17.4 16L16 19.8L14.6 16L16 12.2Z" fill="#34d399"/>
+              <path d="M16 2.5L28 9.25V22.75L16 29.5L4 22.75V9.25L16 2.5Z" stroke="#3f3f46" stroke-width="1.8"
+                fill="#09090b" />
+              <path
+                d="M8.5 16C10.8 12.1 13.4 10.5 16 10.5C18.6 10.5 21.2 12.1 23.5 16C21.2 19.9 18.6 21.5 16 21.5C13.4 21.5 10.8 19.9 8.5 16Z"
+                stroke="#10b981" stroke-width="2" stroke-linejoin="round" />
+              <path d="M16 12.2L17.4 16L16 19.8L14.6 16L16 12.2Z" fill="#34d399" />
             </svg>
           </div>
           <div>
-            <div class="text-sm font-semibold tracking-tight text-zinc-100 leading-none group-hover:text-emerald-400 transition">Reptile Studio</div>
+            <div
+              class="text-sm font-semibold tracking-tight text-zinc-100 leading-none group-hover:text-emerald-400 transition">
+              Reptile Studio</div>
             <div class="text-[10px] font-mono text-zinc-500 mt-1 leading-none">STUDIO PORTAL</div>
           </div>
         </button>
-        <button type="button" onclick="toggleMobileSidebar(false)" class="lg:hidden p-1.5 text-zinc-400 hover:text-zinc-200 rounded-md">
+        <button type="button" onclick="toggleMobileSidebar(false)"
+          class="lg:hidden p-1.5 text-zinc-400 hover:text-zinc-200 rounded-md">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
@@ -389,27 +423,31 @@
       <!-- Primary Navigation -->
       <nav class="flex-1 px-2.5 py-4 space-y-1 overflow-y-auto" aria-label="Primary Navigation">
         <div class="px-2.5 pb-1.5 text-[10px] font-mono uppercase tracking-wider text-zinc-500">Workspace</div>
-        <button data-nav="overview" onclick="navigateTo('overview')" class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
+        <button data-nav="overview" onclick="navigateTo('overview')"
+          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
           <span class="flex items-center gap-2.5">
             <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
             Overview
           </span>
         </button>
-        <button data-nav="projects" onclick="navigateTo('projects')" class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
+        <button data-nav="projects" onclick="navigateTo('projects')"
+          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
           <span class="flex items-center gap-2.5">
             <i data-lucide="folder-kanban" class="w-4 h-4"></i>
             Projects
           </span>
           <span id="nav-count-projects" class="text-[11px] font-mono text-zinc-500">0</span>
         </button>
-        <button data-nav="board" onclick="navigateTo('board')" class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
+        <button data-nav="board" onclick="navigateTo('board')"
+          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
           <span class="flex items-center gap-2.5">
             <i data-lucide="columns-3" class="w-4 h-4"></i>
             Task Board
           </span>
           <span id="nav-count-tasks" class="text-[11px] font-mono text-zinc-500">0</span>
         </button>
-        <button data-nav="bugs" onclick="navigateTo('bugs')" class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
+        <button data-nav="bugs" onclick="navigateTo('bugs')"
+          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
           <span class="flex items-center gap-2.5">
             <i data-lucide="bug" class="w-4 h-4"></i>
             Bug Tracker
@@ -418,13 +456,15 @@
         </button>
 
         <div class="px-2.5 pt-5 pb-1.5 text-[10px] font-mono uppercase tracking-wider text-zinc-500">Studio Vault</div>
-        <button data-nav="builds" onclick="navigateTo('builds')" class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
+        <button data-nav="builds" onclick="navigateTo('builds')"
+          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
           <span class="flex items-center gap-2.5">
             <i data-lucide="package" class="w-4 h-4"></i>
             Builds &amp; Docs
           </span>
         </button>
-        <button data-nav="team" onclick="navigateTo('team')" class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
+        <button data-nav="team" onclick="navigateTo('team')"
+          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
           <span class="flex items-center gap-2.5">
             <i data-lucide="users" class="w-4 h-4"></i>
             Team &amp; Access
@@ -434,15 +474,18 @@
 
       <!-- Live Realtime Sync Badge Footer -->
       <div class="p-3 border-t border-[#27272a]">
-        <div class="px-2.5 py-2 rounded-lg bg-[#09090b] border border-[#27272a] flex items-center justify-between gap-2">
+        <div
+          class="px-2.5 py-2 rounded-lg bg-[#09090b] border border-[#27272a] flex items-center justify-between gap-2">
           <div class="flex items-center gap-2 min-w-0">
             <span class="relative flex h-2 w-2 shrink-0">
-              <span id="rt-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span id="rt-ping"
+                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span id="rt-dot" class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
             <span id="rt-label" class="text-xs font-medium text-emerald-400 truncate">Live Sync</span>
           </div>
-          <button type="button" onclick="fetchAllData(true)" title="Force refresh from Supabase" class="p-1 text-zinc-500 hover:text-zinc-200 rounded transition">
+          <button type="button" onclick="fetchAllData(true)" title="Force refresh from Supabase"
+            class="p-1 text-zinc-500 hover:text-zinc-200 rounded transition">
             <i data-lucide="refresh-cw" class="w-3 h-3"></i>
           </button>
         </div>
@@ -452,36 +495,37 @@
     <!-- Main Content Column -->
     <div class="flex-1 min-w-0 flex flex-col min-h-screen">
       <!-- Top Bar -->
-      <header class="sticky top-0 z-20 h-14 bg-[#09090b]/85 backdrop-blur-md border-b border-[#27272a] px-4 sm:px-6 flex items-center justify-between gap-3">
+      <header
+        class="sticky top-0 z-20 h-14 bg-[#09090b]/85 backdrop-blur-md border-b border-[#27272a] px-4 sm:px-6 flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
-          <button type="button" onclick="toggleMobileSidebar(true)" class="lg:hidden p-2 -ml-2 text-zinc-400 hover:text-zinc-100 rounded-lg hover:bg-[#14151a] transition" aria-label="Open menu">
+          <button type="button" onclick="toggleMobileSidebar(true)"
+            class="lg:hidden p-2 -ml-2 text-zinc-400 hover:text-zinc-100 rounded-lg hover:bg-[#14151a] transition"
+            aria-label="Open menu">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
           <div class="flex items-center gap-2.5 min-w-0">
-            <h2 id="topbar-title" class="text-sm sm:text-base font-semibold tracking-tight text-zinc-100 truncate">Overview</h2>
-            <span id="topbar-subtitle" class="hidden md:inline-block text-xs text-zinc-500 border-l border-[#27272a] pl-2.5 truncate">Studio pulse &amp; active work</span>
+            <h2 id="topbar-title" class="text-sm sm:text-base font-semibold tracking-tight text-zinc-100 truncate">
+              Overview</h2>
+            <span id="topbar-subtitle"
+              class="hidden md:inline-block text-xs text-zinc-500 border-l border-[#27272a] pl-2.5 truncate">Studio
+              pulse &amp; active work</span>
           </div>
         </div>
 
         <div class="flex items-center gap-2 sm:gap-3">
           <!-- Global Ctrl+K Quick Search Trigger -->
-          <button
-            type="button"
-            onclick="openCommandPalette()"
+          <button type="button" onclick="openCommandPalette()"
             class="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#0f1014] hover:bg-[#14151a] border border-[#27272a] text-zinc-400 hover:text-zinc-200 text-xs transition"
-            title="Quick Search (Ctrl+K)"
-          >
+            title="Quick Search (Ctrl+K)">
             <i data-lucide="search" class="w-3.5 h-3.5 text-zinc-500"></i>
             <span class="hidden sm:inline text-zinc-500 pr-4">Search studio...</span>
-            <kbd class="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono bg-[#09090b] border border-[#27272a] rounded text-zinc-400">⌘K</kbd>
+            <kbd
+              class="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono bg-[#09090b] border border-[#27272a] rounded text-zinc-400">⌘K</kbd>
           </button>
 
           <!-- Quick New Task Button -->
-          <button
-            type="button"
-            onclick="openTaskModal()"
-            class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs transition shrink-0"
-          >
+          <button type="button" onclick="openTaskModal()"
+            class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs transition shrink-0">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">New Task</span>
           </button>
@@ -490,25 +534,19 @@
 
           <!-- Logged-in Profile Pill & Sign Out -->
           <div class="flex items-center gap-1.5">
-            <button
-              type="button"
-              onclick="openEditProfileModal(currentProfile.id)"
-              title="Edit your profile"
-              class="flex items-center gap-2 px-2 py-1 rounded-lg bg-[#0f1014] hover:bg-[#14151a] border border-[#27272a] transition text-left"
-            >
-              <div id="topbar-avatar" class="w-6 h-6 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-mono font-semibold flex items-center justify-center shrink-0">RS</div>
+            <button type="button" onclick="openEditProfileModal(currentProfile.id)" title="Edit your profile"
+              class="flex items-center gap-2 px-2 py-1 rounded-lg bg-[#0f1014] hover:bg-[#14151a] border border-[#27272a] transition text-left">
+              <div id="topbar-avatar"
+                class="w-6 h-6 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-mono font-semibold flex items-center justify-center shrink-0">
+                RS</div>
               <div class="hidden md:block leading-tight pr-1">
                 <div id="topbar-user-name" class="text-xs font-medium text-zinc-200">Member</div>
                 <div id="topbar-user-role" class="text-[10px] font-mono text-emerald-400">Member</div>
               </div>
             </button>
-            <button
-              type="button"
-              onclick="handleSignOut()"
-              title="Sign Out"
+            <button type="button" onclick="handleSignOut()" title="Sign Out"
               class="p-2 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition"
-              aria-label="Sign Out"
-            >
+              aria-label="Sign Out">
               <i data-lucide="log-out" class="w-4 h-4"></i>
             </button>
           </div>
@@ -523,30 +561,32 @@
   </div>
 
   <!-- ==================== 4. UNIVERSAL MODAL ROOT ==================== -->
-  <div id="modal-root" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-xs overflow-y-auto">
-    <div id="modal-panel" class="relative w-full max-w-lg bg-[#0f1014] border border-[#27272a] rounded-xl shadow-2xl shadow-black/80 overflow-hidden my-auto animate-in"></div>
+  <div id="modal-root"
+    class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-xs overflow-y-auto">
+    <div id="modal-panel"
+      class="relative w-full max-w-lg bg-[#0f1014] border border-[#27272a] rounded-xl shadow-2xl shadow-black/80 overflow-hidden my-auto animate-in">
+    </div>
   </div>
 
   <!-- ==================== 5. COMMAND PALETTE (CTRL+K / CMD+K) ==================== -->
-  <div id="cmd-root" class="fixed inset-0 z-50 hidden items-start justify-center pt-[12vh] p-4 bg-black/75 backdrop-blur-xs">
-    <div class="w-full max-w-xl bg-[#0f1014] border border-[#27272a] rounded-xl shadow-2xl shadow-black/80 overflow-hidden animate-in">
+  <div id="cmd-root"
+    class="fixed inset-0 z-50 hidden items-start justify-center pt-[12vh] p-4 bg-black/75 backdrop-blur-xs">
+    <div
+      class="w-full max-w-xl bg-[#0f1014] border border-[#27272a] rounded-xl shadow-2xl shadow-black/80 overflow-hidden animate-in">
       <div class="flex items-center gap-3 px-4 py-3 border-b border-[#27272a]">
         <i data-lucide="search" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-        <input
-          id="cmd-input"
-          type="text"
-          placeholder="Search projects, tasks, bugs, builds, docs..."
-          class="w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-500 outline-none"
-          autocomplete="off"
-        />
-        <kbd class="px-1.5 py-0.5 text-[10px] font-mono text-zinc-500 bg-[#09090b] border border-[#27272a] rounded">ESC</kbd>
+        <input id="cmd-input" type="text" placeholder="Search projects, tasks, bugs, builds, docs..."
+          class="w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-500 outline-none" autocomplete="off" />
+        <kbd
+          class="px-1.5 py-0.5 text-[10px] font-mono text-zinc-500 bg-[#09090b] border border-[#27272a] rounded">ESC</kbd>
       </div>
       <div id="cmd-results" class="max-h-[55vh] overflow-y-auto p-2 space-y-1"></div>
     </div>
   </div>
 
   <!-- ==================== 6. TOAST CONTAINER ==================== -->
-  <div id="toast-container" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 w-[calc(100vw-2rem)] max-w-sm pointer-events-none"></div>
+  <div id="toast-container"
+    class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 w-[calc(100vw-2rem)] max-w-sm pointer-events-none"></div>
 
   <!-- ==================== APPLICATION SCRIPT ==================== -->
   <script>
@@ -983,6 +1023,8 @@
       const dot = document.getElementById('login-conn-dot');
       const text = document.getElementById('login-conn-text');
       const submitBtn = document.getElementById('login-submit-btn');
+      const googleBtn = document.getElementById('oauth-google-btn');
+      const discordBtn = document.getElementById('oauth-discord-btn');
 
       if (cfg.source === 'hardcoded') {
         card.classList.add('hidden');
@@ -990,6 +1032,8 @@
         dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shrink-0';
         text.textContent = 'Connected to Reptile Studio Cloud';
         submitBtn.disabled = false;
+        if (googleBtn) googleBtn.disabled = false;
+        if (discordBtn) discordBtn.disabled = false;
       } else if (cfg.source === 'localStorage') {
         card.classList.add('hidden');
         changeFooter.classList.remove('hidden');
@@ -998,10 +1042,12 @@
         document.getElementById('cfg-sb-url').value = cfg.url;
         document.getElementById('cfg-sb-key').value = cfg.key;
         let host = cfg.url;
-        try { host = new URL(cfg.url).host; } catch {}
+        try { host = new URL(cfg.url).host; } catch { }
         dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shrink-0';
         text.textContent = `Connected: ${host}`;
         submitBtn.disabled = false;
+        if (googleBtn) googleBtn.disabled = false;
+        if (discordBtn) discordBtn.disabled = false;
       } else {
         card.classList.remove('hidden');
         changeFooter.classList.add('hidden');
@@ -1010,2681 +1056,125 @@
         dot.className = 'w-2 h-2 rounded-full bg-amber-400 shrink-0';
         text.textContent = 'Enter Supabase credentials above to connect';
         submitBtn.disabled = true;
+        if (googleBtn) googleBtn.disabled = true;
+        if (discordBtn) discordBtn.disabled = true;
       }
       refreshIcons();
     }
-
-    function toggleConfigPanel(show) {
-      if (isHardcodedConfig()) return;
-      const card = document.getElementById('supabase-config-card');
-      if (show) card.classList.remove('hidden');
-      else card.classList.add('hidden');
-      refreshIcons();
-    }
-
-    function clearLocalSupabaseConfig() {
-      localStorage.removeItem(LS_URL_KEY);
-      localStorage.removeItem(LS_KEY_KEY);
-      document.getElementById('cfg-sb-url').value = '';
-      document.getElementById('cfg-sb-key').value = '';
-      teardownSupabaseListeners();
-      sb = null;
-      updateLoginConfigUI();
-      showToast('Cleared saved Supabase credentials', 'info');
-    }
-
+    // ... existing code ... -->
     function toggleForgotMode(showForgot) {
       setLoginAlert('');
       const loginForm = document.getElementById('login-form');
       const forgotForm = document.getElementById('forgot-form');
+      const oauthSection = document.getElementById('oauth-section');
       if (showForgot) {
         const existingEmail = document.getElementById('login-email').value.trim();
         if (existingEmail) document.getElementById('forgot-email').value = existingEmail;
         loginForm.classList.add('hidden');
+        if (oauthSection) oauthSection.classList.add('hidden');
         forgotForm.classList.remove('hidden');
         document.getElementById('forgot-email').focus();
       } else {
         forgotForm.classList.add('hidden');
+        if (oauthSection) oauthSection.classList.remove('hidden');
         loginForm.classList.remove('hidden');
       }
     }
 
-    // Save browser-level Supabase credentials
-    document.getElementById('supabase-config-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const url = document.getElementById('cfg-sb-url').value.trim().replace(/\/+$/, '');
-      const key = document.getElementById('cfg-sb-key').value.trim();
-
-      if (!/^https:\/\/.+\.supabase\.(co|in|net)|^https?:\/\//i.test(url)) {
-        showToast('Please enter a valid Supabase Project URL (https://xxxx.supabase.co).', 'error');
-        return;
-      }
-      localStorage.setItem(LS_URL_KEY, url);
-      localStorage.setItem(LS_KEY_KEY, key);
-
-      teardownSupabaseListeners();
-      if (initSupabaseClient()) {
-        updateLoginConfigUI();
-        showToast('Supabase client connected! You can now sign in.', 'success');
-        await bindAuthAndCheckSession();
-      }
-    });
-
-    // Toggle Password Visibility
-    document.getElementById('toggle-password-btn').addEventListener('click', () => {
-      const input = document.getElementById('login-password');
-      const hidden = input.type === 'password';
-      input.type = hidden ? 'text' : 'password';
-      document.getElementById('toggle-password-btn').innerHTML = `<i data-lucide="${hidden ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>`;
-      refreshIcons();
-    });
-
-    // Sign In with Gmail + Password
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    // 1-Click OAuth Sign-In (Google & Discord)
+    async function signInWithOAuthProvider(provider) {
       if (!sb) {
         setLoginAlert('Please connect your Supabase project first.', 'error');
         return;
       }
       setLoginAlert('');
-      const email = document.getElementById('login-email').value.trim();
-      const password = document.getElementById('login-password').value;
-      const btn = document.getElementById('login-submit-btn');
+      const googleBtn = document.getElementById('oauth-google-btn');
+      const discordBtn = document.getElementById('oauth-discord-btn');
+      const activeBtn = provider === 'google' ? googleBtn : discordBtn;
+      const originalHtml = activeBtn ? activeBtn.innerHTML : '';
 
-      btn.disabled = true;
-      btn.innerHTML = `<span class="w-4 h-4 border-2 border-zinc-950/30 border-t-zinc-950 rounded-full animate-spin"></span> Signing in...`;
-
-      try {
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) {
-          setLoginAlert(error.message || 'Invalid email or password.', 'error');
-          showToast(error.message || 'Sign in failed', 'error');
-        } else if (data?.session) {
-          showToast('Signed in to Reptile Studio', 'success');
-          await handleAuthenticatedSession(data.session);
-        }
-      } catch (err) {
-        setLoginAlert('Network error while connecting to Supabase.', 'error');
-        handleSupabaseError('Sign in failed', err);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<span>Sign In to Portal</span><i data-lucide="arrow-right" class="w-4 h-4"></i>`;
-        refreshIcons();
+      if (googleBtn) googleBtn.disabled = true;
+      if (discordBtn) discordBtn.disabled = true;
+      if (activeBtn) {
+        activeBtn.innerHTML = `<span class="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin"></span><span>Redirecting to ${provider === 'google' ? 'Google' : 'Discord'}...</span>`;
       }
-    });
-
-    // Forgot Password Handler
-    document.getElementById('forgot-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!sb) {
-        setLoginAlert('Please connect your Supabase project first.', 'error');
-        return;
-      }
-      const email = document.getElementById('forgot-email').value.trim();
-      const btn = document.getElementById('forgot-submit-btn');
-      btn.disabled = true;
-      btn.textContent = 'Sending link...';
 
       try {
         const redirectTo = window.location.origin + window.location.pathname;
-        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+        const { error } = await sb.auth.signInWithOAuth({
+          provider,
+          options: { redirectTo },
+        });
         if (error) {
-          setLoginAlert(error.message, 'error');
-          showToast(error.message, 'error');
-        } else {
-          setLoginAlert(`Recovery email sent to ${email}. Check your inbox (and spam folder) for the reset link.`, 'success');
-          showToast('Password recovery email sent', 'success');
-          toggleForgotMode(false);
+          throw error;
         }
       } catch (err) {
-        handleSupabaseError('Password reset failed', err);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i data-lucide="mail" class="w-3.5 h-3.5"></i> Send Recovery Email`;
-        refreshIcons();
+        console.error(`[Reptile Studio] OAuth (${provider}) error:`, err);
+        setLoginAlert(err?.message || `Could not start ${provider} sign-in.`, 'error');
+        showToast(`${provider === 'google' ? 'Google' : 'Discord'} sign-in failed`, 'error');
+        if (googleBtn) googleBtn.disabled = false;
+        if (discordBtn) discordBtn.disabled = false;
+        if (activeBtn) activeBtn.innerHTML = originalHtml;
       }
-    });
-
-    // Password Recovery Modal (Triggered on PASSWORD_RECOVERY event)
-    function openPasswordRecoveryModal() {
-      openModal(`
-        <div class="flex items-center justify-between px-5 py-4 border-b border-[#27272a]">
-          <div class="flex items-center gap-2">
-            <i data-lucide="key-round" class="w-4 h-4 text-emerald-400"></i>
-            <h3 class="text-sm font-semibold text-zinc-100">Set New Password</h3>
-          </div>
-          <button type="button" onclick="closeModal()" class="p-1 text-zinc-500 hover:text-zinc-200"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-        <form id="recovery-pw-form" class="p-5 space-y-4">
-          <p class="text-xs text-zinc-400 leading-relaxed">Choose a new password for your Reptile Studio portal account (minimum 6 characters).</p>
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1">New Password *</label>
-            <input name="password" type="password" minlength="6" required placeholder="••••••••" class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1">Confirm New Password *</label>
-            <input name="confirm" type="password" minlength="6" required placeholder="••••••••" class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none" />
-          </div>
-          <div class="flex justify-end gap-2 pt-3 border-t border-[#27272a]">
-            <button type="button" onclick="closeModal()" class="px-3.5 py-2 rounded-lg text-xs font-medium bg-[#14151a] text-zinc-300 border border-[#27272a]">Cancel</button>
-            <button id="recovery-submit-btn" type="submit" class="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition">Update Password</button>
-          </div>
-        </form>
-      `, 'max-w-md');
-
-      document.getElementById('recovery-pw-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const password = fd.get('password');
-        const confirm = fd.get('confirm');
-        if (password !== confirm) {
-          showToast('Passwords do not match.', 'error');
-          return;
-        }
-        const btn = document.getElementById('recovery-submit-btn');
-        btn.disabled = true;
-        btn.textContent = 'Updating...';
-
-        const { error } = await sb.auth.updateUser({ password });
-        if (error) {
-          handleSupabaseError('Password update failed', error);
-          btn.disabled = false;
-          btn.textContent = 'Update Password';
-          return;
-        }
-        isPasswordRecovery = false;
-        showToast('Password updated successfully!', 'success');
-        closeModal();
-        // Clean recovery hash from URL
-        if (window.location.hash) {
-          window.history.replaceState(null, '', window.location.pathname + window.location.search);
-        }
-      });
     }
 
-    // Non-blocking Profile Setup Form (if user UID has no row in public.profiles yet)
-    document.getElementById('profile-setup-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!sb || !currentSession) return;
-      const fd = new FormData(e.target);
-      const display_name = fd.get('display_name').trim();
-      const username = fd.get('username').trim().toLowerCase().replace(/[^a-z0-9_.-]/g, '');
-      const studio_title = fd.get('studio_title').trim();
-      const btn = document.getElementById('setup-profile-btn');
+    // Parse OAuth callback errors (e.g., blocked by enforce_email_whitelist trigger)
+    function checkOAuthRedirectErrors() {
+      const searchParams = new URLSearchParams(window.location.search);
+      const hashStr = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
+      const hashParams = new URLSearchParams(hashStr);
 
-      if (!username) {
-        showToast('Please enter a valid short handle (letters/numbers).', 'error');
-        return;
-      }
+      const errCode = searchParams.get('error') || hashParams.get('error');
+      const errDesc = searchParams.get('error_description') || hashParams.get('error_description');
 
-      btn.disabled = true;
-      btn.textContent = 'Creating profile...';
+      if (!errCode && !errDesc) return;
 
-      const { data, error } = await sb
-        .from('profiles')
-        .insert({
-          id: currentSession.user.id,
-          username,
-          display_name,
-          access_role: 'Member',
-          studio_title,
-        })
-        .select()
-        .single();
+      const decoded = decodeURIComponent((errDesc || errCode || '').replace(/\+/g, ' '));
+      const isWhitelistBlock = /whitelisted|database error saving new user|access denied/i.test(decoded);
+      const friendlyMsg = isWhitelistBlock
+        ? 'Access denied: Your Google/Discord email is not whitelisted for Reptile Studio. Ask an Admin to add your email to allowed_emails.'
+        : `Sign-in failed: ${decoded}`;
 
-      if (error) {
-        handleSupabaseError('Profile creation failed', error);
-        btn.disabled = false;
-        btn.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Create My Profile Now`;
-        refreshIcons();
-        return;
-      }
+      // Clean error parameters from browser URL
+      window.history.replaceState(null, '', window.location.pathname);
 
-      currentProfile = data;
-      showToast(`Profile created for ${data.display_name}!`, 'success');
-      await enterDashboard();
-    });
-
-    async function handleSignOut() {
-      teardownRealtime();
-      if (sb) {
-        const { error } = await sb.auth.signOut();
-        if (error) handleSupabaseError('Sign out issue', error);
-      }
-      currentSession = null;
-      currentProfile = null;
-      activeUserId = null;
-      closeModal();
-      closeCommandPalette();
       showScreen('login-view');
       updateLoginConfigUI();
-      showToast('Signed out of Reptile Studio', 'info');
+      setLoginAlert(friendlyMsg, 'error');
+      showToast(isWhitelistBlock ? 'Email not on studio whitelist' : 'OAuth sign-in error', 'error');
     }
 
-    // ==================== AUTH LIFECYCLE & DATA LOADING ====================
-    function teardownRealtime() {
-      if (realtimeDebounce) {
-        clearTimeout(realtimeDebounce);
-        realtimeDebounce = null;
-      }
-      if (sb && realtimeChannel) {
-        try { sb.removeChannel(realtimeChannel); } catch {}
-        realtimeChannel = null;
-      }
+    // Save browser-level Supabase credentials
+    // ... existing code ... -->
+    if (!profile) {
+      // Show non-blocking Profile Setup screen (pre-filled from Google/Discord metadata if available)
+      currentProfile = null;
+      const meta = session.user.user_metadata || {};
+      const emailPrefix = (session.user.email || '').split('@')[0];
+      const rawHandle = meta.preferred_username || meta.user_name || emailPrefix || '';
+      const cleanHandle = String(rawHandle).toLowerCase().replace(/[^a-z0-9_.-]/g, '');
+      const rawDisplayName =
+        meta.full_name ||
+        meta.name ||
+        meta.custom_claims?.global_name ||
+        (cleanHandle ? cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1) : '');
+
+      document.getElementById('setup-user-uid').textContent = session.user.id;
+      document.getElementById('setup-user-email').textContent = session.user.email || '';
+      const form = document.getElementById('profile-setup-form');
+      form.username.value = cleanHandle;
+      form.display_name.value = rawDisplayName;
+      showScreen('profile-setup-view');
+      return;
     }
 
-    function teardownSupabaseListeners() {
-      teardownRealtime();
-      if (authSubscription) {
-        try { authSubscription.unsubscribe(); } catch {}
-        authSubscription = null;
-      }
-    }
-
-    async function bindAuthAndCheckSession() {
-      if (!sb) {
-        showScreen('login-view');
-        updateLoginConfigUI();
-        return;
-      }
-
-      // Listen for auth transitions (including PASSWORD_RECOVERY links)
-      const { data: listener } = sb.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'PASSWORD_RECOVERY') {
-          isPasswordRecovery = true;
-          if (session) {
-            await handleAuthenticatedSession(session);
-          }
-          openPasswordRecoveryModal();
-        } else if (event === 'SIGNED_IN' && session) {
-          await handleAuthenticatedSession(session);
-        } else if (event === 'SIGNED_OUT') {
-          teardownRealtime();
-          currentSession = null;
-          currentProfile = null;
-          activeUserId = null;
-          showScreen('login-view');
-          updateLoginConfigUI();
-        }
-      });
-      authSubscription = listener?.subscription || null;
-
-      // Initial session check
-      try {
-        const { data, error } = await sb.auth.getSession();
-        if (error) {
-          handleSupabaseError('Session check error', error);
-          showScreen('login-view');
-          updateLoginConfigUI();
-          return;
-        }
-        if (data?.session) {
-          await handleAuthenticatedSession(data.session);
-          if (isPasswordRecovery) openPasswordRecoveryModal();
-        } else {
-          showScreen('login-view');
-          updateLoginConfigUI();
-        }
-      } catch (err) {
-        handleSupabaseError('Connection error', err);
-        showScreen('login-view');
-        updateLoginConfigUI();
-      }
-    }
-
-    async function handleAuthenticatedSession(session) {
-      if (!session?.user) return;
-      if (activeUserId === session.user.id && currentProfile) {
-        currentSession = session;
-        return;
-      }
-
-      currentSession = session;
-      activeUserId = session.user.id;
-
-      // Fetch user's profile row from public.profiles
-      const { data: profile, error } = await sb
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .maybeSingle();
-
-      if (error) {
-        handleSupabaseError('Could not load profile', error);
-      }
-
-      if (!profile) {
-        // Show non-blocking Profile Setup screen
-        currentProfile = null;
-        document.getElementById('setup-user-uid').textContent = session.user.id;
-        document.getElementById('setup-user-email').textContent = session.user.email || '';
-        const defaultHandle = (session.user.email || '').split('@')[0].toLowerCase().replace(/[^a-z0-9_.-]/g, '');
-        const form = document.getElementById('profile-setup-form');
-        form.username.value = defaultHandle;
-        form.display_name.value = defaultHandle ? defaultHandle.charAt(0).toUpperCase() + defaultHandle.slice(1) : '';
-        showScreen('profile-setup-view');
-        return;
-      }
-
-      currentProfile = profile;
-      await enterDashboard();
-    }
-
-    async function enterDashboard() {
-      showScreen('app-shell');
-      updateTopbarUser();
-      await fetchAllData(false);
-      subscribeToRealtime();
-      navigateTo(currentView || 'overview');
-    }
-
-    function updateTopbarUser() {
-      if (!currentProfile) return;
-      document.getElementById('topbar-avatar').textContent = getInitials(currentProfile.display_name || currentProfile.username);
-      document.getElementById('topbar-user-name').textContent = currentProfile.display_name || currentProfile.username;
-      const roleEl = document.getElementById('topbar-user-role');
-      roleEl.textContent = currentProfile.access_role || 'Member';
-      roleEl.className = currentProfile.access_role === 'Admin'
-        ? 'text-[10px] font-mono text-emerald-400'
-        : 'text-[10px] font-mono text-zinc-400';
-    }
-
-    // Fetch all 7 PostgreSQL tables in parallel
-    async function fetchAllData(showRefreshToast = false) {
-      if (!sb || !currentSession) return;
-      try {
-        const [
-          profilesRes,
-          projectsRes,
-          tasksRes,
-          bugsRes,
-          buildsRes,
-          docsRes,
-          logsRes,
-        ] = await Promise.all([
-          sb.from('profiles').select('*').order('created_at', { ascending: true }),
-          sb.from('projects').select('*').order('created_at', { ascending: false }),
-          sb.from('tasks').select('*').order('created_at', { ascending: false }),
-          sb.from('bugs').select('*').order('created_at', { ascending: false }),
-          sb.from('builds').select('*').order('created_at', { ascending: false }),
-          sb.from('docs').select('*').order('created_at', { ascending: false }),
-          sb.from('activity_logs').select('*').order('created_at', { ascending: false }).limit(50),
-        ]);
-
-        const responses = [
-          ['profiles', profilesRes],
-          ['projects', projectsRes],
-          ['tasks', tasksRes],
-          ['bugs', bugsRes],
-          ['builds', buildsRes],
-          ['docs', docsRes],
-          ['activity_logs', logsRes],
-        ];
-
-        for (const [table, res] of responses) {
-          if (res.error) {
-            handleSupabaseError(`Failed to load ${table}`, res.error);
-          } else {
-            db[table] = res.data || [];
-          }
-        }
-
-        // Keep currentProfile fresh if edited
-        const freshMe = db.profiles.find((p) => p.id === currentSession.user.id);
-        if (freshMe) {
-          currentProfile = freshMe;
-          updateTopbarUser();
-        }
-
-        updateSidebarBadges();
-        renderCurrentView();
-        if (showRefreshToast) showToast('Synced with Supabase', 'info');
-      } catch (err) {
-        handleSupabaseError('Failed to fetch studio data', err);
-      }
-    }
-
-    // Realtime Live Sync across all 7 tables
-    function setRealtimeStatusUI(status) {
-      const dot = document.getElementById('rt-dot');
-      const ping = document.getElementById('rt-ping');
-      const label = document.getElementById('rt-label');
-      if (!dot || !label) return;
-
-      if (status === 'SUBSCRIBED') {
-        dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-emerald-500';
-        ping.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75';
-        label.className = 'text-xs font-medium text-emerald-400 truncate';
-        label.textContent = 'Live Sync';
-      } else if (status === 'CONNECTING') {
-        dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-amber-400';
-        ping.className = 'hidden';
-        label.className = 'text-xs font-medium text-amber-300 truncate';
-        label.textContent = 'Connecting...';
-      } else {
-        dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-zinc-500';
-        ping.className = 'hidden';
-        label.className = 'text-xs font-medium text-zinc-400 truncate';
-        label.textContent = 'Sync Paused';
-      }
-    }
-
-    function scheduleRealtimeRefresh() {
-      if (realtimeDebounce) clearTimeout(realtimeDebounce);
-      realtimeDebounce = setTimeout(() => {
-        // Avoid nuking focus while a user is actively typing inside a filter search box
-        const activeEl = document.activeElement;
-        const isTypingInFilter = activeEl && activeEl.dataset && activeEl.dataset.liveSearch === 'true';
-        fetchAllData(false).then(() => {
-          if (isTypingInFilter && activeEl.id) {
-            const restored = document.getElementById(activeEl.id);
-            if (restored) {
-              restored.focus();
-              restored.setSelectionRange(restored.value.length, restored.value.length);
-            }
-          }
-        });
-      }, 250);
-    }
-
-    function subscribeToRealtime() {
-      teardownRealtime();
-      if (!sb) return;
-      setRealtimeStatusUI('CONNECTING');
-
-      const tables = ['projects', 'tasks', 'bugs', 'builds', 'docs', 'activity_logs', 'profiles'];
-      let channel = sb.channel('reptile-studio-live');
-
-      tables.forEach((table) => {
-        channel = channel.on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table },
-          () => scheduleRealtimeRefresh()
-        );
-      });
-
-      channel.subscribe((status) => {
-        setRealtimeStatusUI(status);
-      });
-
-      realtimeChannel = channel;
-    }
-
-    // Activity Logger Helper
-    async function logActivity(action, target) {
-      if (!sb || !currentProfile) return;
-      const actor_name = currentProfile.display_name || currentProfile.username || 'Studio Member';
-      const { error } = await sb.from('activity_logs').insert({
-        actor_name,
-        action,
-        target: String(target || '').slice(0, 140),
-      });
-      if (error) {
-        console.warn('Activity log insert failed:', error.message);
-      }
-    }
-
-    // ==================== NAVIGATION SHELL ====================
-    const VIEW_META = {
-      overview: { title: 'Overview', subtitle: 'Studio pulse & live telemetry' },
-      projects: { title: 'Projects', subtitle: 'Active titles, engines & milestones' },
-      board: { title: 'Task Board', subtitle: 'Kanban sprint & discipline tracker' },
-      bugs: { title: 'Bug Tracker', subtitle: 'QA reports, repro steps & fixes' },
-      builds: { title: 'Builds & Docs', subtitle: 'Playable archives & studio vault' },
-      team: { title: 'Team & Access', subtitle: 'Studio profiles, roles & backups' },
-    };
-
-    function toggleMobileSidebar(open) {
-      const sidebar = document.getElementById('sidebar');
-      const backdrop = document.getElementById('sidebar-backdrop');
-      if (open) {
-        sidebar.classList.remove('-translate-x-full');
-        backdrop.classList.remove('hidden');
-      } else {
-        sidebar.classList.add('-translate-x-full');
-        backdrop.classList.add('hidden');
-      }
-    }
-
-    function updateSidebarBadges() {
-      const openTasks = db.tasks.filter((t) => t.status !== 'Done').length;
-      const openBugs = db.bugs.filter((b) => b.status === 'Open' || b.status === 'In Progress').length;
-      document.getElementById('nav-count-projects').textContent = db.projects.length;
-      document.getElementById('nav-count-tasks').textContent = openTasks;
-      document.getElementById('nav-count-bugs').textContent = openBugs;
-    }
-
-    function navigateTo(view) {
-      currentView = view;
-      toggleMobileSidebar(false);
-
-      document.querySelectorAll('.nav-item').forEach((btn) => {
-        const isActive = btn.dataset.nav === view;
-        btn.className = isActive
-          ? 'nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium bg-[#14151a] text-emerald-400 border border-[#27272a] transition'
-          : 'nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-[#14151a]/70 border border-transparent transition';
-      });
-
-      const meta = VIEW_META[view] || VIEW_META.overview;
-      document.getElementById('topbar-title').textContent = meta.title;
-      document.getElementById('topbar-subtitle').textContent = meta.subtitle;
-
-      renderCurrentView();
-    }
-
-    function renderCurrentView() {
-      if (!currentProfile) return;
-      updateSidebarBadges();
-      const container = document.getElementById('main-content');
-      if (currentView === 'overview') renderOverview(container);
-      else if (currentView === 'projects') renderProjects(container);
-      else if (currentView === 'board') renderTaskBoard(container);
-      else if (currentView === 'bugs') renderBugTracker(container);
-      else if (currentView === 'builds') renderBuildsAndDocs(container);
-      else if (currentView === 'team') renderTeamAccess(container);
-      refreshIcons();
-    }
-
-    // ==================== MODULE 1: OVERVIEW ====================
-    function renderOverview(container) {
-      const activeProjects = db.projects.filter((p) => p.status !== 'Released').length;
-      const openTasks = db.tasks.filter((t) => t.status !== 'Done');
-      const inProgressTasks = openTasks.filter((t) => t.status === 'In Progress').length;
-      const openBugs = db.bugs.filter((b) => b.status === 'Open' || b.status === 'In Progress');
-      const blockerBugs = openBugs.filter((b) => b.severity === 'Blocker').length;
-      const totalBuilds = db.builds.length;
-
-      const myAllTasks = db.tasks.filter((t) => t.assignee_id === currentProfile.id);
-      const myFilteredTasks = filters.myTasksShowDone
-        ? myAllTasks
-        : myAllTasks.filter((t) => t.status !== 'Done');
-
-      container.innerHTML = `
-        <div class="space-y-6 animate-in">
-          <!-- 4 KPI Cards -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <div onclick="navigateTo('projects')" class="cursor-pointer bg-[#0f1014] hover:border-zinc-700 border border-[#27272a] rounded-xl p-4 transition">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-zinc-400">Active Projects</span>
-                <i data-lucide="folder-kanban" class="w-4 h-4 text-emerald-400"></i>
-              </div>
-              <div class="mt-3 flex items-baseline justify-between">
-                <span class="text-2xl font-semibold tracking-tight text-zinc-100 font-mono">${activeProjects}</span>
-                <span class="text-[11px] text-zinc-500">${db.projects.length} total in studio</span>
-              </div>
-            </div>
-
-            <div onclick="navigateTo('board')" class="cursor-pointer bg-[#0f1014] hover:border-zinc-700 border border-[#27272a] rounded-xl p-4 transition">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-zinc-400">Open Tasks</span>
-                <i data-lucide="columns-3" class="w-4 h-4 text-emerald-400"></i>
-              </div>
-              <div class="mt-3 flex items-baseline justify-between">
-                <span class="text-2xl font-semibold tracking-tight text-zinc-100 font-mono">${openTasks.length}</span>
-                <span class="text-[11px] text-sky-400 font-mono">${inProgressTasks} in progress</span>
-              </div>
-            </div>
-
-            <div onclick="navigateTo('bugs')" class="cursor-pointer bg-[#0f1014] hover:border-zinc-700 border ${blockerBugs > 0 ? 'border-red-500/35' : 'border-[#27272a]'} rounded-xl p-4 transition">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-zinc-400">Open Bugs</span>
-                <i data-lucide="bug" class="w-4 h-4 ${blockerBugs > 0 ? 'text-red-400' : 'text-emerald-400'}"></i>
-              </div>
-              <div class="mt-3 flex items-baseline justify-between">
-                <span class="text-2xl font-semibold tracking-tight text-zinc-100 font-mono">${openBugs.length}</span>
-                ${blockerBugs > 0
-                  ? `<span class="text-[11px] font-mono font-semibold text-red-400 bg-red-500/10 border border-red-500/25 px-1.5 py-0.5 rounded">${blockerBugs} BLOCKER</span>`
-                  : `<span class="text-[11px] text-zinc-500">0 blockers</span>`
-                }
-              </div>
-            </div>
-
-            <div onclick="navigateTo('builds')" class="cursor-pointer bg-[#0f1014] hover:border-zinc-700 border border-[#27272a] rounded-xl p-4 transition">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-zinc-400">Total Builds</span>
-                <i data-lucide="package" class="w-4 h-4 text-emerald-400"></i>
-              </div>
-              <div class="mt-3 flex items-baseline justify-between gap-2">
-                <span class="text-2xl font-semibold tracking-tight text-zinc-100 font-mono">${totalBuilds}</span>
-                <span class="text-[11px] font-mono text-emerald-400 truncate">${db.builds[0] ? escapeHtml(db.builds[0].version) : 'No builds yet'}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Empty State Welcome Banner (when projects.length === 0) -->
-          ${db.projects.length === 0 ? `
-            <div class="bg-[#0f1014] border border-emerald-500/30 rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div class="flex items-start gap-3.5">
-                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 shrink-0">
-                  <i data-lucide="rocket" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h3 class="text-sm font-semibold text-zinc-100">Welcome to Reptile Studio Live Portal</h3>
-                  <p class="text-xs text-zinc-400 mt-1 max-w-xl leading-relaxed">
-                    Your Supabase database is connected and syncing in real time. Create your first game project from scratch, or seed starter studio data (Night Shift Ramen &amp; Project Wildlands) to test every board right away.
-                  </p>
-                </div>
-              </div>
-              <div class="flex items-center gap-2.5 shrink-0 flex-wrap">
-                <button type="button" onclick="openProjectModal()" class="px-3.5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs inline-flex items-center gap-1.5 transition">
-                  <i data-lucide="plus" class="w-3.5 h-3.5"></i> Create First Project
-                </button>
-                <button id="seed-starter-btn" type="button" onclick="seedStarterStudioData()" class="px-3.5 py-2 rounded-lg bg-[#14151a] hover:bg-zinc-800 text-zinc-200 border border-[#27272a] font-medium text-xs inline-flex items-center gap-1.5 transition">
-                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i> Seed Starter Studio Data
-                </button>
-              </div>
-            </div>
-          ` : `
-            <!-- Active Projects Progress Strip -->
-            <div>
-              <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-semibold text-zinc-200">Active Projects Progress</h3>
-                <button type="button" onclick="navigateTo('projects')" class="text-xs text-emerald-400 hover:text-emerald-300 font-medium inline-flex items-center gap-1 transition">
-                  Manage projects <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                ${db.projects.slice(0, 4).map((p) => {
-                  const m = getProjectMetrics(p);
-                  return `
-                    <div onclick="openProjectDetail('${p.id}')" class="cursor-pointer bg-[#0f1014] hover:bg-[#14151a] border border-[#27272a] hover:border-zinc-700 rounded-xl p-4 transition flex flex-col justify-between gap-3.5">
-                      <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                          <div class="flex items-center gap-2 flex-wrap">
-                            <h4 class="text-sm font-semibold text-zinc-100 truncate">${escapeHtml(p.name)}</h4>
-                            ${projectStatusBadge(p.status)}
-                          </div>
-                          <p class="text-xs text-zinc-500 mt-1 line-clamp-1">${escapeHtml(p.gdd_summary || 'No GDD summary yet.')}</p>
-                        </div>
-                        <span class="shrink-0 text-[11px] font-mono px-2 py-0.5 rounded bg-[#14151a] border border-[#27272a] text-zinc-300">${escapeHtml(p.engine)}</span>
-                      </div>
-                      <div>
-                        <div class="flex items-center justify-between text-[11px] font-mono mb-1.5">
-                          <span class="text-zinc-400">${m.tasksDone}/${m.tasksTotal} tasks · ${m.msDone}/${m.msTotal} milestones</span>
-                          <span class="text-emerald-400 font-medium">${m.pct}%</span>
-                        </div>
-                        <div class="h-1.5 w-full bg-[#18181b] rounded-full overflow-hidden">
-                          <div class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: ${m.pct}%"></div>
-                        </div>
-                        <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-[#27272a]/70 text-[11px] text-zinc-500">
-                          <span class="inline-flex items-center gap-1.5">
-                            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-                            Target: <span class="font-mono text-zinc-300">${formatDateShort(p.target_date)}</span>
-                          </span>
-                          <span class="text-emerald-400 font-medium">Inspect →</span>
-                        </div>
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-          `}
-
-          <!-- Lower Split: My Assigned Tasks & Live Studio Activity -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            <!-- My Assigned Tasks -->
-            <div class="lg:col-span-7 bg-[#0f1014] border border-[#27272a] rounded-xl flex flex-col">
-              <div class="px-4 py-3.5 border-b border-[#27272a] flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2">
-                  <i data-lucide="check-square" class="w-4 h-4 text-emerald-400"></i>
-                  <h3 class="text-sm font-semibold text-zinc-200">My Assigned Tasks</h3>
-                  <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-[#14151a] text-zinc-400 border border-[#27272a]">${myAllTasks.filter((t) => t.status !== 'Done').length}</span>
-                </div>
-                <label class="inline-flex items-center gap-1.5 text-xs text-zinc-400 cursor-pointer select-none">
-                  <input type="checkbox" ${filters.myTasksShowDone ? 'checked' : ''} onchange="filters.myTasksShowDone = this.checked; renderCurrentView();" class="rounded bg-[#09090b] border-[#27272a] accent-emerald-500" />
-                  Show Done
-                </label>
-              </div>
-              <div class="divide-y divide-[#27272a]/70">
-                ${myFilteredTasks.length === 0 ? `
-                  <div class="p-8 text-center">
-                    <i data-lucide="sparkles" class="w-6 h-6 text-emerald-500/60 mx-auto mb-2"></i>
-                    <p class="text-xs text-zinc-400">No open tasks assigned to ${escapeHtml(currentProfile.display_name || currentProfile.username)}.</p>
-                  </div>
-                ` : myFilteredTasks.map((t) => {
-                  const proj = getProjectById(t.project_id);
-                  const isDone = t.status === 'Done';
-                  return `
-                    <div class="px-4 py-3 hover:bg-[#14151a]/60 transition flex items-start gap-3">
-                      <button
-                        type="button"
-                        onclick="toggleMyTaskDone('${t.id}')"
-                        class="mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition ${isDone ? 'bg-emerald-500 border-emerald-500 text-zinc-950' : 'border-zinc-600 hover:border-emerald-400 bg-[#09090b]'}"
-                        title="${isDone ? 'Move back to In Progress' : 'Mark Done'}"
-                      >
-                        ${isDone ? '<i data-lucide="check" class="w-3 h-3 stroke-[3]"></i>' : ''}
-                      </button>
-                      <div class="min-w-0 flex-1 cursor-pointer" onclick="openTaskModal('${t.id}')">
-                        <div class="flex items-center gap-2 flex-wrap">
-                          <span class="text-[10px] font-mono text-zinc-500">${shortCode(t.id, 'TSK')}</span>
-                          <span class="text-xs sm:text-sm font-medium ${isDone ? 'line-through text-zinc-500' : 'text-zinc-200'} truncate">${escapeHtml(t.title)}</span>
-                        </div>
-                        <div class="flex items-center gap-2 mt-1.5 flex-wrap">
-                          <span class="text-[11px] text-zinc-500">${proj ? escapeHtml(proj.name) : 'Studio Task'}</span>
-                          <span class="text-zinc-700">·</span>
-                          ${disciplineBadge(t.discipline)}
-                          ${priorityBadge(t.priority)}
-                          <span class="text-[10px] font-mono text-zinc-500 ml-auto">${escapeHtml(t.status)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-
-            <!-- Live Studio Activity Feed (Latest 15) -->
-            <div class="lg:col-span-5 bg-[#0f1014] border border-[#27272a] rounded-xl flex flex-col">
-              <div class="px-4 py-3.5 border-b border-[#27272a] flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i>
-                  <h3 class="text-sm font-semibold text-zinc-200">Live Studio Activity</h3>
-                </div>
-                <span class="text-[10px] font-mono text-emerald-400/90 flex items-center gap-1.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> REALTIME
-                </span>
-              </div>
-              <div class="p-4 space-y-3.5 max-h-[390px] overflow-y-auto">
-                ${db.activity_logs.length === 0 ? `
-                  <p class="text-xs text-zinc-500 text-center py-8">No studio activity logged yet. Actions across the team will stream here live.</p>
-                ` : db.activity_logs.slice(0, 15).map((act) => `
-                  <div class="flex items-start gap-3">
-                    <div class="w-6 h-6 rounded-md bg-[#14151a] border border-[#27272a] text-[10px] font-mono text-zinc-300 flex items-center justify-center shrink-0 mt-0.5">
-                      ${getInitials(act.actor_name)}
-                    </div>
-                    <div class="min-w-0 flex-1 text-xs leading-relaxed">
-                      <span class="font-medium text-zinc-200">${escapeHtml(act.actor_name)}</span>
-                      <span class="text-zinc-400"> ${escapeHtml(act.action)} </span>
-                      <span class="text-zinc-200 font-medium">${escapeHtml(act.target)}</span>
-                      <div class="text-[10px] font-mono text-zinc-600 mt-0.5">${relativeTime(act.created_at)}</div>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    async function toggleMyTaskDone(taskId) {
-      const task = db.tasks.find((t) => t.id === taskId);
-      if (!task) return;
-      const nextStatus = task.status === 'Done' ? 'In Progress' : 'Done';
-      const prevStatus = task.status;
-
-      // Optimistic update
-      task.status = nextStatus;
-      renderCurrentView();
-
-      const { error } = await sb.from('tasks').update({ status: nextStatus }).eq('id', taskId);
-      if (error) {
-        task.status = prevStatus;
-        renderCurrentView();
-        handleSupabaseError('Failed to update task', error);
-        return;
-      }
-      await logActivity(nextStatus === 'Done' ? 'completed task' : 'moved to In Progress', task.title);
-      showToast(`Task marked ${nextStatus}`, 'success');
-    }
-
-    async function seedStarterStudioData() {
-      const btn = document.getElementById('seed-starter-btn');
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Seeding Supabase...';
-      }
-
-      try {
-        // 1. Insert 2 starter game projects
-        const { data: createdProjects, error: projErr } = await sb
-          .from('projects')
-          .insert([
-            {
-              name: 'Night Shift Ramen',
-              status: 'Alpha',
-              engine: 'Unity URP',
-              gdd_summary: 'A 1990s Japanese rural PS1-style cozy-horror cooking and late-night delivery game set in a quiet rain-soaked town past 1:00 AM.',
-              repo_url: 'https://github.com/reptile-studio/night-shift-ramen',
-              itch_url: 'https://reptilestudio.itch.io/night-shift-ramen',
-              target_date: '2026-12-20',
-              milestones: [
-                { id: 'ms_1', title: 'Core cooking & broth prep state machine', done: true },
-                { id: 'ms_2', title: 'PS1 vertex jitter + CRT shader toggle', done: true },
-                { id: 'ms_3', title: 'Night 1–3 anomaly encounter pacing', done: false },
-                { id: 'ms_4', title: 'Public itch.io Alpha Demo upload', done: false },
-              ],
-            },
-            {
-              name: 'Project Wildlands',
-              status: 'Prototyping',
-              engine: 'Unity URP',
-              gdd_summary: 'Third-person co-op survival action-RPG featuring procedural biomes, stamina melee combat with input buffering, and multiplayer boss hunts.',
-              repo_url: 'https://github.com/reptile-studio/project-wildlands',
-              itch_url: '',
-              target_date: '2027-02-15',
-              milestones: [
-                { id: 'ms_5', title: 'Third-person movement & dodge roll feel', done: true },
-                { id: 'ms_6', title: 'Combo combat & 180ms input buffering', done: false },
-                { id: 'ms_7', title: 'Co-op multiplayer relay lobby sync', done: false },
-              ],
-            },
-          ])
-          .select();
-
-        if (projErr) throw projErr;
-
-        const ramen = createdProjects.find((p) => p.name === 'Night Shift Ramen') || createdProjects[0];
-        const wildlands = createdProjects.find((p) => p.name === 'Project Wildlands') || createdProjects[1];
-        const myId = currentProfile.id;
-
-        // 2. Insert starter tasks, bug, build, and doc in parallel
-        const [tasksRes, bugsRes, buildsRes, docsRes] = await Promise.all([
-          sb.from('tasks').insert([
-            {
-              project_id: ramen.id,
-              title: 'Tune PS1 vertex snapping & affine texture jitter shader',
-              description: 'Expose grid snapping density per-material so kitchen counter utensils stay crisp while alley props keep retro wobble.',
-              status: 'In Progress',
-              priority: 'High',
-              discipline: 'Code',
-              assignee_id: myId,
-              due_date: '2026-12-04',
-            },
-            {
-              project_id: ramen.id,
-              title: 'Polish customer order ticket readability on 720p screens',
-              description: 'Increase contrast behind handwritten order slips and test safe-area scaling on mobile aspect ratios.',
-              status: 'Backlog',
-              priority: 'Medium',
-              discipline: 'UI / UX',
-              assignee_id: myId,
-              due_date: '2026-12-08',
-            },
-            {
-              project_id: ramen.id,
-              title: 'Looping rain & neon transformer alley ambient mix',
-              description: 'Export seamless 3-minute OGG stem and hook pause-menu low-pass attenuation snapshot.',
-              status: 'In Review',
-              priority: 'Medium',
-              discipline: 'Audio',
-              assignee_id: myId,
-              due_date: '2026-12-02',
-            },
-            {
-              project_id: wildlands.id,
-              title: 'Implement melee light/heavy combo input buffer window',
-              description: 'Buffer attack and dodge inputs during final 180ms of swing recovery frames.',
-              status: 'In Progress',
-              priority: 'Critical',
-              discipline: 'Code',
-              assignee_id: myId,
-              due_date: '2026-12-05',
-            },
-            {
-              project_id: wildlands.id,
-              title: 'Greybox starter campfire clearing & sunken shrine sightlines',
-              description: 'Verify jump clearances and flank routes before terrain foliage pass.',
-              status: 'Done',
-              priority: 'Low',
-              discipline: 'Level Design',
-              assignee_id: myId,
-              due_date: '2026-11-24',
-            },
-          ]),
-          sb.from('bugs').insert([
-            {
-              project_id: ramen.id,
-              title: 'Customer AI queue deadlocks if two patience timers expire on same frame',
-              severity: 'Blocker',
-              build_version: 'v0.4.2-alpha',
-              status: 'Open',
-              repro_steps: '1. Seat 2 customers simultaneously on Night 2\n2. Let both patience bars hit 0 at the exact same tick\n3. SeatController fails to release queue lock.',
-              notes: 'Inspect SeatController queue release callback and add defensive timeout guard.',
-              reporter_id: myId,
-            },
-          ]),
-          sb.from('builds').insert([
-            {
-              project_id: ramen.id,
-              version: 'v0.4.2-alpha',
-              platform: 'Windows',
-              download_url: 'https://reptilestudio.itch.io/night-shift-ramen',
-              changelog: 'Added Night 2 anomaly triggers, improved ramen steam shader warmth, and tuned rain audio bus.',
-            },
-          ]),
-          sb.from('docs').insert([
-            {
-              project_id: ramen.id,
-              title: 'Night Shift Ramen — Master GDD',
-              category: 'GDD',
-              url: 'https://notion.so/reptile-studio/night-shift-ramen-gdd',
-              notes: 'Full shift progression, customer dialogues, recipe matrix, and horror escalation rules.',
-            },
-          ]),
-        ]);
-
-        if (tasksRes.error) throw tasksRes.error;
-        if (bugsRes.error) throw bugsRes.error;
-        if (buildsRes.error) throw buildsRes.error;
-        if (docsRes.error) throw docsRes.error;
-
-        await logActivity('seeded starter studio data', 'Night Shift Ramen & Project Wildlands');
-        showToast('Starter studio data seeded to Supabase!', 'success');
-        await fetchAllData(false);
-      } catch (err) {
-        handleSupabaseError('Failed to seed starter data', err);
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i> Seed Starter Studio Data`;
-          refreshIcons();
-        }
-      }
-    }
-
-    // ==================== MODULE 2: PROJECTS HUB ====================
-    function renderProjects(container) {
-      const statuses = ['All', ...PROJECT_STATUSES];
-      container.innerHTML = `
-        <div class="space-y-5 animate-in">
-          <!-- Controls -->
-          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-            <div class="flex items-center gap-2 flex-wrap">
-              <div class="relative">
-                <i data-lucide="search" class="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                <input
-                  id="projects-search-input"
-                  data-live-search="true"
-                  type="text"
-                  value="${escapeHtml(filters.projectSearch)}"
-                  oninput="filters.projectSearch = this.value; renderProjectsGrid();"
-                  placeholder="Search projects or engine..."
-                  class="bg-[#0f1014] border border-[#27272a] focus:border-emerald-500/60 rounded-lg pl-8 pr-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 outline-none w-52"
-                />
-              </div>
-              <div class="flex items-center gap-1 bg-[#0f1014] border border-[#27272a] rounded-lg p-1 overflow-x-auto max-w-full">
-                ${statuses.map((st) => `
-                  <button
-                    type="button"
-                    onclick="filters.projectStatus = '${st}'; renderProjects(document.getElementById('main-content')); refreshIcons();"
-                    class="px-2.5 py-1 rounded-md text-xs font-medium transition whitespace-nowrap ${filters.projectStatus === st ? 'bg-[#14151a] text-emerald-400 border border-[#27272a]' : 'text-zinc-400 hover:text-zinc-200 border border-transparent'}"
-                  >${st}</button>
-                `).join('')}
-              </div>
-            </div>
-            <button type="button" onclick="openProjectModal()" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs transition shrink-0">
-              <i data-lucide="plus" class="w-4 h-4"></i> New Project
-            </button>
-          </div>
-
-          <div id="projects-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
-        </div>
-      `;
-      renderProjectsGrid();
-    }
-
-    function renderProjectsGrid() {
-      const grid = document.getElementById('projects-grid');
-      if (!grid) return;
-
-      const q = filters.projectSearch.trim().toLowerCase();
-      const filtered = db.projects.filter((p) => {
-        const matchStatus = filters.projectStatus === 'All' || p.status === filters.projectStatus;
-        const matchQ = !q || p.name.toLowerCase().includes(q) || (p.engine || '').toLowerCase().includes(q) || (p.gdd_summary || '').toLowerCase().includes(q);
-        return matchStatus && matchQ;
-      });
-
-      if (filtered.length === 0) {
-        grid.innerHTML = `
-          <div class="col-span-full bg-[#0f1014] border border-[#27272a] rounded-xl p-10 text-center">
-            <i data-lucide="folder-open" class="w-7 h-7 text-zinc-600 mx-auto mb-2"></i>
-            <p class="text-sm text-zinc-400">No projects found matching your filter.</p>
-          </div>
-        `;
-        refreshIcons();
-        return;
-      }
-
-      grid.innerHTML = filtered.map((p) => {
-        const m = getProjectMetrics(p);
-        const openBugs = db.bugs.filter((b) => b.project_id === p.id && (b.status === 'Open' || b.status === 'In Progress')).length;
-        return `
-          <div class="bg-[#0f1014] border border-[#27272a] hover:border-zinc-700 rounded-xl p-5 flex flex-col justify-between gap-4 transition">
-            <div>
-              <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2.5 flex-wrap">
-                    <h3 onclick="openProjectDetail('${p.id}')" class="text-base font-semibold text-zinc-100 hover:text-emerald-400 cursor-pointer transition">${escapeHtml(p.name)}</h3>
-                    ${projectStatusBadge(p.status)}
-                  </div>
-                  <div class="flex items-center gap-2 mt-1.5 text-xs text-zinc-500 flex-wrap">
-                    <span class="font-mono text-zinc-300 bg-[#14151a] px-1.5 py-0.5 rounded border border-[#27272a] text-[11px]">${escapeHtml(p.engine)}</span>
-                    <span class="inline-flex items-center gap-1"><i data-lucide="flag" class="w-3 h-3"></i> ${formatDateShort(p.target_date)}</span>
-                    <span class="inline-flex items-center gap-1"><i data-lucide="bug" class="w-3 h-3 ${openBugs > 0 ? 'text-amber-400' : ''}"></i> ${openBugs} open</span>
-                  </div>
-                </div>
-                <div class="flex items-center gap-1 shrink-0">
-                  <button type="button" onclick="openProjectModal('${p.id}')" title="Edit Project" class="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-[#14151a] transition">
-                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                  </button>
-                  <button type="button" onclick="confirmDeleteProject('${p.id}')" title="Delete Project" class="p-1.5 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                  </button>
-                </div>
-              </div>
-              <p class="text-xs text-zinc-400 mt-3.5 leading-relaxed line-clamp-2">${escapeHtml(p.gdd_summary || 'No GDD summary written yet.')}</p>
-            </div>
-
-            <div class="space-y-3">
-              <div>
-                <div class="flex items-center justify-between text-[11px] font-mono mb-1.5">
-                  <span class="text-zinc-400">${m.tasksDone}/${m.tasksTotal} tasks · ${m.msDone}/${m.msTotal} milestones</span>
-                  <span class="text-emerald-400">${m.pct}%</span>
-                </div>
-                <div class="h-1.5 w-full bg-[#18181b] rounded-full overflow-hidden">
-                  <div class="h-full bg-emerald-500 rounded-full" style="width: ${m.pct}%"></div>
-                </div>
-              </div>
-
-              <div class="flex items-center justify-between gap-2 pt-3 border-t border-[#27272a] flex-wrap">
-                <div class="flex items-center gap-2">
-                  ${p.repo_url ? `
-                    <a href="${escapeHtml(safeUrl(p.repo_url))}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-[11px] text-zinc-300 transition">
-                      <i data-lucide="git-branch" class="w-3 h-3 text-emerald-400"></i> GitHub
-                    </a>
-                  ` : ''}
-                  ${p.itch_url ? `
-                    <a href="${escapeHtml(safeUrl(p.itch_url))}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-[11px] text-zinc-300 transition">
-                      <i data-lucide="gamepad-2" class="w-3 h-3 text-emerald-400"></i> itch.io
-                    </a>
-                  ` : ''}
-                </div>
-                <div class="flex items-center gap-2">
-                  <button type="button" onclick="jumpToProjectBoard('${p.id}')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[#14151a] hover:bg-zinc-800 text-zinc-200 border border-[#27272a] transition">
-                    Open Board
-                  </button>
-                  <button type="button" onclick="openProjectDetail('${p.id}')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/25 transition">
-                    Details
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-      refreshIcons();
-    }
-
-    function jumpToProjectBoard(projectId) {
-      closeModal();
-      filters.boardProject = projectId;
-      navigateTo('board');
-    }
-
-    function openProjectDetail(projectId) {
-      const p = getProjectById(projectId);
-      if (!p) return;
-      const m = getProjectMetrics(p);
-      const milestones = Array.isArray(p.milestones) ? p.milestones : [];
-
-      openModal(`
-        <div class="flex items-center justify-between px-5 py-4 border-b border-[#27272a] bg-[#09090b]/40">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <h3 class="text-base font-semibold text-zinc-100 truncate">${escapeHtml(p.name)}</h3>
-            ${projectStatusBadge(p.status)}
-          </div>
-          <button type="button" onclick="closeModal()" class="p-1 text-zinc-500 hover:text-zinc-200 rounded-lg"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-
-        <div class="p-5 space-y-5 max-h-[75vh] overflow-y-auto">
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-            <div class="p-2.5 rounded-lg bg-[#09090b] border border-[#27272a]">
-              <div class="text-[10px] font-mono uppercase text-zinc-500">Engine</div>
-              <div class="text-xs font-mono text-zinc-200 mt-0.5">${escapeHtml(p.engine)}</div>
-            </div>
-            <div class="p-2.5 rounded-lg bg-[#09090b] border border-[#27272a]">
-              <div class="text-[10px] font-mono uppercase text-zinc-500">Target Date</div>
-              <div class="text-xs font-mono text-zinc-200 mt-0.5">${formatDateShort(p.target_date)}</div>
-            </div>
-            <div class="p-2.5 rounded-lg bg-[#09090b] border border-[#27272a] col-span-2 sm:col-span-1">
-              <div class="text-[10px] font-mono uppercase text-zinc-500">Overall Progress</div>
-              <div class="text-xs font-mono text-emerald-400 mt-0.5">${m.pct}% (${m.tasksDone}/${m.tasksTotal} tasks)</div>
-            </div>
-          </div>
-
-          <div>
-            <h4 class="text-xs font-mono uppercase tracking-wider text-zinc-500 mb-1.5">GDD Summary</h4>
-            <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed bg-[#09090b] border border-[#27272a] rounded-lg p-3.5 whitespace-pre-line">${escapeHtml(p.gdd_summary || 'No GDD summary provided.')}</p>
-          </div>
-
-          ${(p.repo_url || p.itch_url) ? `
-            <div class="flex items-center gap-2 flex-wrap">
-              ${p.repo_url ? `
-                <a href="${escapeHtml(safeUrl(p.repo_url))}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-xs text-zinc-200 transition">
-                  <i data-lucide="git-branch" class="w-3.5 h-3.5 text-emerald-400"></i> GitHub Repo
-                  <i data-lucide="external-link" class="w-3 h-3 text-zinc-500"></i>
-                </a>
-              ` : ''}
-              ${p.itch_url ? `
-                <a href="${escapeHtml(safeUrl(p.itch_url))}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-xs text-zinc-200 transition">
-                  <i data-lucide="gamepad-2" class="w-3.5 h-3.5 text-emerald-400"></i> itch.io Page
-                  <i data-lucide="external-link" class="w-3 h-3 text-zinc-500"></i>
-                </a>
-              ` : ''}
-            </div>
-          ` : ''}
-
-          <!-- Interactive JSONB Milestones -->
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <h4 class="text-xs font-mono uppercase tracking-wider text-zinc-500">Milestones (${m.msDone}/${m.msTotal})</h4>
-            </div>
-            <div class="space-y-1.5">
-              ${milestones.length === 0 ? '<p class="text-xs text-zinc-500">No milestones yet. Add your first checkpoint below.</p>' : milestones.map((ms) => `
-                <div class="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-[#09090b] border border-[#27272a] hover:border-zinc-700 transition">
-                  <label class="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0">
-                    <input type="checkbox" ${ms.done ? 'checked' : ''} onchange="toggleProjectMilestone('${p.id}', '${escapeHtml(ms.id)}')" class="rounded bg-[#0f1014] border-[#27272a] accent-emerald-500 shrink-0" />
-                    <span class="text-xs ${ms.done ? 'line-through text-zinc-500' : 'text-zinc-200'} truncate">${escapeHtml(ms.title)}</span>
-                  </label>
-                  <button type="button" onclick="deleteProjectMilestone('${p.id}', '${escapeHtml(ms.id)}')" title="Delete milestone" class="p-1 text-zinc-600 hover:text-red-400 rounded transition shrink-0">
-                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                  </button>
-                </div>
-              `).join('')}
-            </div>
-            <form onsubmit="addProjectMilestone(event, '${p.id}')" class="flex gap-2 mt-2.5">
-              <input id="new-milestone-input" type="text" required placeholder="Add milestone checkpoint..." class="flex-1 bg-[#09090b] border border-[#27272a] focus:border-emerald-500/60 rounded-lg px-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-600 outline-none" />
-              <button type="submit" class="px-3 py-1.5 rounded-lg bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-xs font-medium text-zinc-200 transition">Add</button>
-            </form>
-          </div>
-        </div>
-
-        <div class="px-5 py-3.5 border-t border-[#27272a] bg-[#09090b]/40 flex items-center justify-between gap-2 flex-wrap">
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="openProjectModal('${p.id}')" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#14151a] hover:bg-zinc-800 text-zinc-300 border border-[#27272a] transition">Edit Project</button>
-            <button type="button" onclick="confirmDeleteProject('${p.id}')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/25 transition">Delete</button>
-          </div>
-          <button type="button" onclick="jumpToProjectBoard('${p.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition">
-            <i data-lucide="columns-3" class="w-3.5 h-3.5"></i> Open Task Board
-          </button>
-        </div>
-      `, 'max-w-2xl');
-    }
-
-    async function persistProjectMilestones(project, nextMilestones, activityMsg) {
-      const prev = project.milestones;
-      project.milestones = nextMilestones;
-      openProjectDetail(project.id);
-
-      const { error } = await sb
-        .from('projects')
-        .update({ milestones: nextMilestones })
-        .eq('id', project.id);
-
-      if (error) {
-        project.milestones = prev;
-        openProjectDetail(project.id);
-        handleSupabaseError('Failed to save milestone', error);
-        return;
-      }
-      if (activityMsg) await logActivity(activityMsg, project.name);
-      renderCurrentView();
-    }
-
-    async function toggleProjectMilestone(projectId, milestoneId) {
-      const p = getProjectById(projectId);
-      if (!p) return;
-      const list = (Array.isArray(p.milestones) ? p.milestones : []).map((ms) =>
-        ms.id === milestoneId ? { ...ms, done: !ms.done } : ms
-      );
-      await persistProjectMilestones(p, list, 'updated milestone in');
-    }
-
-    async function addProjectMilestone(e, projectId) {
-      e.preventDefault();
-      const input = document.getElementById('new-milestone-input');
-      const title = input.value.trim();
-      if (!title) return;
-      const p = getProjectById(projectId);
-      if (!p) return;
-      const list = [...(Array.isArray(p.milestones) ? p.milestones : []), { id: 'ms_' + Date.now(), title, done: false }];
-      await persistProjectMilestones(p, list, 'added milestone to');
-      showToast('Milestone added', 'success');
-    }
-
-    async function deleteProjectMilestone(projectId, milestoneId) {
-      const p = getProjectById(projectId);
-      if (!p) return;
-      const list = (Array.isArray(p.milestones) ? p.milestones : []).filter((ms) => ms.id !== milestoneId);
-      await persistProjectMilestones(p, list, 'removed milestone from');
-    }
-
-    function openProjectModal(projectId = null) {
-      const p = projectId ? getProjectById(projectId) : null;
-      const isEdit = Boolean(p);
-
-      openModal(`
-        <div class="flex items-center justify-between px-5 py-4 border-b border-[#27272a]">
-          <h3 class="text-sm font-semibold text-zinc-100">${isEdit ? 'Edit Project' : 'Create New Project'}</h3>
-          <button type="button" onclick="closeModal()" class="p-1 text-zinc-500 hover:text-zinc-200"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-        <form id="project-form" class="p-5 space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Project Name *</label>
-              <input name="name" required value="${escapeHtml(p?.name || '')}" placeholder="e.g., Night Shift Ramen" class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none" />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Status</label>
-              <select name="status" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none">
-                ${PROJECT_STATUSES.map((st) => `<option value="${st}" ${(p?.status || 'Prototyping') === st ? 'selected' : ''}>${st}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Engine</label>
-              <input name="engine" value="${escapeHtml(p?.engine || 'Unity URP')}" placeholder="Unity URP / Unreal 5 / Godot 4" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 outline-none" />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Target Date</label>
-              <input name="target_date" type="date" value="${escapeHtml(p?.target_date || '')}" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 outline-none" />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">GitHub Repository URL</label>
-              <input name="repo_url" value="${escapeHtml(p?.repo_url || '')}" placeholder="https://github.com/..." class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none" />
-            </div>
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-zinc-400 mb-1">itch.io / Store URL</label>
-              <input name="itch_url" value="${escapeHtml(p?.itch_url || '')}" placeholder="https://reptilestudio.itch.io/..." class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none" />
-            </div>
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-zinc-400 mb-1">GDD Summary</label>
-              <textarea name="gdd_summary" rows="3" placeholder="Core gameplay loop, visual style, target platform goals..." class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none resize-none">${escapeHtml(p?.gdd_summary || '')}</textarea>
-            </div>
-          </div>
-          <div class="flex justify-end gap-2 pt-3 border-t border-[#27272a]">
-            <button type="button" onclick="closeModal()" class="px-3.5 py-2 rounded-lg text-xs font-medium bg-[#14151a] text-zinc-300 border border-[#27272a]">Cancel</button>
-            <button id="proj-submit-btn" type="submit" class="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition">${isEdit ? 'Save Changes' : 'Create Project'}</button>
-          </div>
-        </form>
-      `, 'max-w-xl');
-
-      document.getElementById('project-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const btn = document.getElementById('proj-submit-btn');
-        btn.disabled = true;
-
-        const payload = {
-          name: fd.get('name').trim(),
-          status: fd.get('status'),
-          engine: fd.get('engine').trim() || 'Unity',
-          target_date: toNullableDate(fd.get('target_date')),
-          repo_url: fd.get('repo_url').trim(),
-          itch_url: fd.get('itch_url').trim(),
-          gdd_summary: fd.get('gdd_summary').trim(),
-        };
-
-        if (isEdit) {
-          const { error } = await sb.from('projects').update(payload).eq('id', p.id);
-          if (error) {
-            handleSupabaseError('Failed to update project', error);
-            btn.disabled = false;
-            return;
-          }
-          await logActivity('updated project', payload.name);
-          showToast(`Updated ${payload.name}`, 'success');
-        } else {
-          const { error } = await sb.from('projects').insert({ ...payload, milestones: [] });
-          if (error) {
-            handleSupabaseError('Failed to create project', error);
-            btn.disabled = false;
-            return;
-          }
-          await logActivity('created project', payload.name);
-          showToast(`Created ${payload.name}`, 'success');
-        }
-        closeModal();
-        await fetchAllData(false);
-      });
-    }
-
-    function confirmDeleteProject(projectId) {
-      const p = getProjectById(projectId);
-      if (!p) return;
-      openConfirmModal({
-        title: `Delete "${p.name}"?`,
-        message: 'Deleting this project cascades to its linked tasks, bugs, and builds in Supabase. This cannot be undone.',
-        confirmLabel: 'Delete Project',
-        onConfirm: async () => {
-          const { error } = await sb.from('projects').delete().eq('id', projectId);
-          if (error) {
-            handleSupabaseError('Failed to delete project', error);
-            return;
-          }
-          if (filters.boardProject === projectId) filters.boardProject = 'All';
-          if (filters.bugProject === projectId) filters.bugProject = 'All';
-          await logActivity('deleted project', p.name);
-          showToast(`Deleted project ${p.name}`, 'info');
-          await fetchAllData(false);
-        },
-      });
-    }
-
-    // ==================== MODULE 3: TASK BOARD (KANBAN) ====================
-    function renderTaskBoard(container) {
-      container.innerHTML = `
-        <div class="space-y-4 animate-in">
-          <!-- Filter Bar -->
-          <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3 bg-[#0f1014] border border-[#27272a] rounded-xl p-3">
-            <div class="flex items-center gap-2 flex-wrap">
-              <div class="relative">
-                <i data-lucide="search" class="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                <input
-                  id="board-search-input"
-                  data-live-search="true"
-                  type="text"
-                  value="${escapeHtml(filters.boardSearch)}"
-                  oninput="filters.boardSearch = this.value; renderKanbanColumns();"
-                  placeholder="Search tasks..."
-                  class="bg-[#09090b] border border-[#27272a] focus:border-emerald-500/60 rounded-lg pl-8 pr-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 outline-none w-44 sm:w-52"
-                />
-              </div>
-
-              <select onchange="filters.boardProject = this.value; renderKanbanColumns();" class="bg-[#09090b] border border-[#27272a] rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 outline-none">
-                <option value="All">All Projects</option>
-                ${db.projects.map((p) => `<option value="${p.id}" ${filters.boardProject === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
-              </select>
-
-              <select onchange="filters.boardDiscipline = this.value; renderKanbanColumns();" class="bg-[#09090b] border border-[#27272a] rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 outline-none">
-                <option value="All">All Disciplines</option>
-                ${TASK_DISCIPLINES.map((d) => `<option value="${d}" ${filters.boardDiscipline === d ? 'selected' : ''}>${d}</option>`).join('')}
-              </select>
-
-              <select onchange="filters.boardAssignee = this.value; renderKanbanColumns();" class="bg-[#09090b] border border-[#27272a] rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 outline-none">
-                <option value="All">All Members</option>
-                ${db.profiles.map((m) => `<option value="${m.id}" ${filters.boardAssignee === m.id ? 'selected' : ''}>${escapeHtml(m.display_name)}</option>`).join('')}
-              </select>
-
-              <button type="button" onclick="filters.boardProject='All'; filters.boardDiscipline='All'; filters.boardAssignee='All'; filters.boardSearch=''; renderCurrentView();" class="text-[11px] text-zinc-400 hover:text-emerald-400 px-1.5 py-1 transition">
-                Reset
-              </button>
-            </div>
-
-            <div class="flex items-center justify-between xl:justify-end gap-2">
-              <span id="board-task-count" class="text-[11px] font-mono text-zinc-500">0 tasks</span>
-              <button type="button" onclick="openTaskModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs transition">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i> New Task
-              </button>
-            </div>
-          </div>
-
-          <!-- 4-Column Kanban Grid -->
-          <div id="kanban-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start"></div>
-        </div>
-      `;
-      renderKanbanColumns();
-    }
-
-    function renderKanbanColumns() {
-      const grid = document.getElementById('kanban-grid');
-      if (!grid) return;
-      const q = filters.boardSearch.trim().toLowerCase();
-
-      const filtered = db.tasks.filter((t) => {
-        const matchProj = filters.boardProject === 'All' || t.project_id === filters.boardProject;
-        const matchDisc = filters.boardDiscipline === 'All' || t.discipline === filters.boardDiscipline;
-        const matchAssignee = filters.boardAssignee === 'All' || t.assignee_id === filters.boardAssignee;
-        const matchQ = !q || t.title.toLowerCase().includes(q) || (t.description || '').toLowerCase().includes(q) || shortCode(t.id, 'TSK').toLowerCase().includes(q);
-        return matchProj && matchDisc && matchAssignee && matchQ;
-      });
-
-      const countEl = document.getElementById('board-task-count');
-      if (countEl) countEl.textContent = `${filtered.length} task${filtered.length === 1 ? '' : 's'}`;
-
-      const colDots = {
-        Backlog: 'bg-zinc-500',
-        'In Progress': 'bg-sky-400',
-        'In Review': 'bg-amber-400',
-        Done: 'bg-emerald-400',
-      };
-
-      grid.innerHTML = TASK_STATUSES.map((col) => {
-        const colTasks = filtered.filter((t) => t.status === col);
-        return `
-          <div
-            class="kanban-col bg-[#0f1014] border border-[#27272a] rounded-xl flex flex-col min-h-[260px] transition-colors"
-            data-status="${col}"
-            ondragover="handleDragOver(event)"
-            ondragleave="handleDragLeave(event)"
-            ondrop="handleDrop(event, '${col}')"
-          >
-            <div class="px-3.5 py-3 border-b border-[#27272a] flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full ${colDots[col]}"></span>
-                <h3 class="text-xs font-semibold text-zinc-200 tracking-wide">${col}</h3>
-                <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-[#14151a] text-zinc-400 border border-[#27272a]">${colTasks.length}</span>
-              </div>
-              <button type="button" onclick="openTaskModal(null, '${col}')" title="Add task to ${col}" class="p-1 text-zinc-500 hover:text-zinc-200 hover:bg-[#14151a] rounded transition">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-
-            <div class="p-2.5 space-y-2.5 flex-1">
-              ${colTasks.length === 0 ? `
-                <div class="border border-dashed border-[#27272a] rounded-lg py-8 px-3 text-center text-[11px] text-zinc-600">
-                  Drop tasks here
-                </div>
-              ` : colTasks.map((t) => {
-                const proj = getProjectById(t.project_id);
-                const assignee = getProfileById(t.assignee_id);
-                return `
-                  <div
-                    draggable="true"
-                    ondragstart="handleDragStart(event, '${t.id}')"
-                    ondragend="handleDragEnd(event)"
-                    onclick="openTaskModal('${t.id}')"
-                    class="cursor-pointer bg-[#14151a] hover:bg-[#1a1b22] border border-[#27272a] hover:border-zinc-600 rounded-lg p-3 space-y-2.5 transition select-none"
-                  >
-                    <div class="flex items-center justify-between gap-2">
-                      <span class="text-[10px] font-mono text-zinc-500">${shortCode(t.id, 'TSK')}</span>
-                      ${priorityBadge(t.priority)}
-                    </div>
-                    <p class="text-xs font-medium text-zinc-100 leading-snug">${escapeHtml(t.title)}</p>
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                      ${disciplineBadge(t.discipline)}
-                      <span class="text-[10px] text-zinc-500 truncate max-w-[130px]">${proj ? escapeHtml(proj.name) : ''}</span>
-                    </div>
-                    <div class="flex items-center justify-between pt-2 border-t border-[#27272a]/80">
-                      <span class="text-[10px] font-mono text-zinc-500 flex items-center gap-1">
-                        <i data-lucide="calendar" class="w-3 h-3"></i>
-                        ${t.due_date ? formatDateShort(t.due_date).replace(/, \d{4}/, '') : 'No due'}
-                      </span>
-                      <span title="${assignee ? escapeHtml(assignee.display_name) : 'Unassigned'}" class="w-5 h-5 rounded bg-[#09090b] border border-[#27272a] text-[10px] font-mono text-emerald-300 flex items-center justify-center">
-                        ${assignee ? getInitials(assignee.display_name) : '—'}
-                      </span>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        `;
-      }).join('');
-      refreshIcons();
-    }
-
-    // Drag & Drop with Optimistic Update + Supabase Persist
-    function handleDragStart(e, taskId) {
-      draggedTaskId = taskId;
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', taskId);
-      setTimeout(() => e.target.classList.add('kanban-card-dragging'), 0);
-    }
-
-    function handleDragEnd(e) {
-      e.target.classList.remove('kanban-card-dragging');
-      document.querySelectorAll('.kanban-col').forEach((c) => c.classList.remove('kanban-drop-active'));
-      draggedTaskId = null;
-    }
-
-    function handleDragOver(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      e.currentTarget.classList.add('kanban-drop-active');
-    }
-
-    function handleDragLeave(e) {
-      if (!e.currentTarget.contains(e.relatedTarget)) {
-        e.currentTarget.classList.remove('kanban-drop-active');
-      }
-    }
-
-    async function handleDrop(e, newStatus) {
-      e.preventDefault();
-      e.currentTarget.classList.remove('kanban-drop-active');
-      const taskId = draggedTaskId || e.dataTransfer.getData('text/plain');
-      if (!taskId) return;
-      const task = db.tasks.find((t) => t.id === taskId);
-      if (!task || task.status === newStatus) return;
-
-      const prevStatus = task.status;
-      task.status = newStatus;
-      renderKanbanColumns();
-      updateSidebarBadges();
-
-      const { error } = await sb.from('tasks').update({ status: newStatus }).eq('id', taskId);
-      if (error) {
-        task.status = prevStatus;
-        renderKanbanColumns();
-        updateSidebarBadges();
-        handleSupabaseError('Failed to move task', error);
-        return;
-      }
-      await logActivity(`moved to ${newStatus}`, task.title);
-      showToast(`Moved to ${newStatus}`, 'success');
-    }
-
-    function openTaskModal(taskId = null, defaultStatus = 'Backlog') {
-      const task = taskId ? db.tasks.find((t) => t.id === taskId) : null;
-      const isEdit = Boolean(task);
-      const defaultProj = filters.boardProject !== 'All' ? filters.boardProject : (db.projects[0]?.id || '');
-
-      openModal(`
-        <div class="flex items-center justify-between px-5 py-4 border-b border-[#27272a]">
-          <div class="flex items-center gap-2">
-            ${isEdit ? `<span class="text-[11px] font-mono px-2 py-0.5 rounded bg-[#14151a] border border-[#27272a] text-emerald-400">${shortCode(task.id, 'TSK')}</span>` : ''}
-            <h3 class="text-sm font-semibold text-zinc-100">${isEdit ? 'Task Details' : 'Create New Task'}</h3>
-          </div>
-          <button type="button" onclick="closeModal()" class="p-1 text-zinc-500 hover:text-zinc-200"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-
-        <form id="task-form" class="p-5 space-y-4">
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1">Title *</label>
-            <input name="title" required value="${escapeHtml(task?.title || '')}" placeholder="e.g., Fix camera jitter on sloped terrain" class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none" />
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Project</label>
-              <select name="project_id" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none">
-                <option value="">No Project</option>
-                ${db.projects.map((p) => `<option value="${p.id}" ${(task ? task.project_id : defaultProj) === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Status</label>
-              <select name="status" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none">
-                ${TASK_STATUSES.map((st) => `<option value="${st}" ${(task?.status || defaultStatus) === st ? 'selected' : ''}>${st}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Discipline</label>
-              <select name="discipline" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none">
-                ${TASK_DISCIPLINES.map((d) => `<option value="${d}" ${(task?.discipline || 'Code') === d ? 'selected' : ''}>${d}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Priority</label>
-              <select name="priority" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none">
-                ${TASK_PRIORITIES.map((pr) => `<option value="${pr}" ${(task?.priority || 'Medium') === pr ? 'selected' : ''}>${pr}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Assignee</label>
-              <select name="assignee_id" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none">
-                <option value="">Unassigned</option>
-                ${db.profiles.map((m) => `<option value="${m.id}" ${(task ? task.assignee_id : currentProfile.id) === m.id ? 'selected' : ''}>${escapeHtml(m.display_name)} (@${escapeHtml(m.username)})</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Due Date</label>
-              <input name="due_date" type="date" value="${escapeHtml(task?.due_date || '')}" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 outline-none" />
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1">Description</label>
-            <textarea name="description" rows="3" placeholder="Acceptance criteria, shader params, or asset notes..." class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none resize-none">${escapeHtml(task?.description || '')}</textarea>
-          </div>
-
-          <div class="flex items-center justify-between gap-2 pt-3 border-t border-[#27272a]">
-            ${isEdit ? `
-              <button type="button" onclick="confirmDeleteTask('${task.id}')" class="px-3 py-2 rounded-lg text-xs font-medium text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/25 transition">Delete</button>
-            ` : '<div></div>'}
-            <div class="flex items-center gap-2">
-              <button type="button" onclick="closeModal()" class="px-3.5 py-2 rounded-lg text-xs font-medium bg-[#14151a] text-zinc-300 border border-[#27272a]">Cancel</button>
-              <button id="task-submit-btn" type="submit" class="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition">${isEdit ? 'Save Task' : 'Create Task'}</button>
-            </div>
-          </div>
-        </form>
-      `, 'max-w-xl');
-
-      document.getElementById('task-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const btn = document.getElementById('task-submit-btn');
-        btn.disabled = true;
-
-        const payload = {
-          title: fd.get('title').trim(),
-          project_id: toNullableUuid(fd.get('project_id')),
-          status: fd.get('status'),
-          discipline: fd.get('discipline'),
-          priority: fd.get('priority'),
-          assignee_id: toNullableUuid(fd.get('assignee_id')),
-          due_date: toNullableDate(fd.get('due_date')),
-          description: fd.get('description').trim(),
-        };
-
-        if (isEdit) {
-          const { error } = await sb.from('tasks').update(payload).eq('id', task.id);
-          if (error) {
-            handleSupabaseError('Failed to save task', error);
-            btn.disabled = false;
-            return;
-          }
-          await logActivity(task.status !== payload.status ? `moved to ${payload.status}` : 'updated task', payload.title);
-          showToast('Task updated', 'success');
-        } else {
-          const { error } = await sb.from('tasks').insert(payload);
-          if (error) {
-            handleSupabaseError('Failed to create task', error);
-            btn.disabled = false;
-            return;
-          }
-          await logActivity('created task', payload.title);
-          showToast('Task created', 'success');
-        }
-        closeModal();
-        await fetchAllData(false);
-      });
-    }
-
-    function confirmDeleteTask(taskId) {
-      const t = db.tasks.find((x) => x.id === taskId);
-      if (!t) return;
-      openConfirmModal({
-        title: `Delete task?`,
-        message: `Remove "${t.title}" permanently from Supabase?`,
-        confirmLabel: 'Delete Task',
-        onConfirm: async () => {
-          const { error } = await sb.from('tasks').delete().eq('id', taskId);
-          if (error) {
-            handleSupabaseError('Failed to delete task', error);
-            return;
-          }
-          await logActivity('deleted task', t.title);
-          showToast('Task deleted', 'info');
-          await fetchAllData(false);
-        },
-      });
-    }
-
-    // ==================== MODULE 4: BUG TRACKER ====================
-    function renderBugTracker(container) {
-      container.innerHTML = `
-        <div class="space-y-4 animate-in">
-          <!-- Filter Bar -->
-          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-[#0f1014] border border-[#27272a] rounded-xl p-3">
-            <div class="flex items-center gap-2 flex-wrap">
-              <div class="relative">
-                <i data-lucide="search" class="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                <input
-                  id="bug-search-input"
-                  data-live-search="true"
-                  type="text"
-                  value="${escapeHtml(filters.bugSearch)}"
-                  oninput="filters.bugSearch = this.value; renderBugTableBody();"
-                  placeholder="Search bugs or build..."
-                  class="bg-[#09090b] border border-[#27272a] focus:border-emerald-500/60 rounded-lg pl-8 pr-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 outline-none w-48"
-                />
-              </div>
-
-              <select onchange="filters.bugProject = this.value; renderBugTableBody();" class="bg-[#09090b] border border-[#27272a] rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 outline-none">
-                <option value="All">All Projects</option>
-                ${db.projects.map((p) => `<option value="${p.id}" ${filters.bugProject === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
-              </select>
-
-              <select onchange="filters.bugSeverity = this.value; renderBugTableBody();" class="bg-[#09090b] border border-[#27272a] rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 outline-none">
-                <option value="All">All Severities</option>
-                ${BUG_SEVERITIES.map((s) => `<option value="${s}" ${filters.bugSeverity === s ? 'selected' : ''}>${s}</option>`).join('')}
-              </select>
-
-              <select onchange="filters.bugStatus = this.value; renderBugTableBody();" class="bg-[#09090b] border border-[#27272a] rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 outline-none">
-                <option value="All">All Statuses</option>
-                ${BUG_STATUSES.map((st) => `<option value="${st}" ${filters.bugStatus === st ? 'selected' : ''}>${st}</option>`).join('')}
-              </select>
-            </div>
-
-            <button type="button" onclick="openBugModal()" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs transition shrink-0">
-              <i data-lucide="bug" class="w-3.5 h-3.5"></i> Log Bug
-            </button>
-          </div>
-
-          <!-- High-Density Table -->
-          <div class="bg-[#0f1014] border border-[#27272a] rounded-xl overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse min-w-[740px]">
-                <thead>
-                  <tr class="border-b border-[#27272a] bg-[#09090b]/60 text-[11px] font-mono uppercase tracking-wider text-zinc-500">
-                    <th class="py-3 px-4 w-28">Severity</th>
-                    <th class="py-3 px-4">Bug Title &amp; Project</th>
-                    <th class="py-3 px-4 w-32">Build</th>
-                    <th class="py-3 px-4 w-36">Reporter</th>
-                    <th class="py-3 px-4 w-36">Status</th>
-                  </tr>
-                </thead>
-                <tbody id="bug-table-body" class="divide-y divide-[#27272a]/70 text-xs"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      `;
-      renderBugTableBody();
-    }
-
-    function renderBugTableBody() {
-      const tbody = document.getElementById('bug-table-body');
-      if (!tbody) return;
-      const q = filters.bugSearch.trim().toLowerCase();
-
-      const filtered = db.bugs.filter((b) => {
-        const matchProj = filters.bugProject === 'All' || b.project_id === filters.bugProject;
-        const matchSev = filters.bugSeverity === 'All' || b.severity === filters.bugSeverity;
-        const matchStatus = filters.bugStatus === 'All' || b.status === filters.bugStatus;
-        const matchQ = !q || b.title.toLowerCase().includes(q) || (b.build_version || '').toLowerCase().includes(q) || shortCode(b.id, 'BUG').toLowerCase().includes(q);
-        return matchProj && matchSev && matchStatus && matchQ;
-      });
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-zinc-500">No bugs match your current filters.</td></tr>`;
-        return;
-      }
-
-      const statusColors = {
-        Open: 'text-red-400 border-red-500/30 bg-red-500/10',
-        'In Progress': 'text-amber-300 border-amber-500/30 bg-amber-500/10',
-        Fixed: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
-        Closed: 'text-zinc-400 border-zinc-700 bg-zinc-800/70',
-      };
-
-      tbody.innerHTML = filtered.map((b) => {
-        const proj = getProjectById(b.project_id);
-        const reporter = getProfileById(b.reporter_id);
-        return `
-          <tr class="hover:bg-[#14151a]/80 transition group">
-            <td onclick="openBugDetail('${b.id}')" class="py-3 px-4 cursor-pointer">${severityBadge(b.severity)}</td>
-            <td onclick="openBugDetail('${b.id}')" class="py-3 px-4 cursor-pointer">
-              <div class="flex items-center gap-2">
-                <span class="text-[10px] font-mono text-zinc-500">${shortCode(b.id, 'BUG')}</span>
-                <span class="font-medium text-zinc-200 group-hover:text-emerald-300 transition">${escapeHtml(b.title)}</span>
-              </div>
-              <div class="text-[11px] text-zinc-500 mt-0.5">${proj ? escapeHtml(proj.name) : 'Unassigned Project'} · ${relativeTime(b.created_at)}</div>
-            </td>
-            <td onclick="openBugDetail('${b.id}')" class="py-3 px-4 font-mono text-zinc-400 cursor-pointer">${escapeHtml(b.build_version || '—')}</td>
-            <td onclick="openBugDetail('${b.id}')" class="py-3 px-4 cursor-pointer">
-              <div class="flex items-center gap-2">
-                <span class="w-5 h-5 rounded bg-[#14151a] border border-[#27272a] text-[10px] font-mono text-zinc-300 flex items-center justify-center shrink-0">
-                  ${reporter ? getInitials(reporter.display_name) : '—'}
-                </span>
-                <span class="text-zinc-300 truncate">${reporter ? escapeHtml(reporter.display_name) : 'Team'}</span>
-              </div>
-            </td>
-            <td class="py-3 px-4">
-              <select
-                onchange="inlineUpdateBugStatus('${b.id}', this.value)"
-                class="text-[11px] font-medium rounded-md px-2 py-1 border outline-none cursor-pointer ${statusColors[b.status] || statusColors.Open}"
-              >
-                ${BUG_STATUSES.map((st) => `<option value="${st}" class="bg-[#0f1014] text-zinc-200" ${b.status === st ? 'selected' : ''}>${st}</option>`).join('')}
-              </select>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    async function inlineUpdateBugStatus(bugId, newStatus) {
-      const bug = db.bugs.find((b) => b.id === bugId);
-      if (!bug) return;
-      const prev = bug.status;
-      bug.status = newStatus;
-      renderBugTableBody();
-      updateSidebarBadges();
-
-      const { error } = await sb.from('bugs').update({ status: newStatus }).eq('id', bugId);
-      if (error) {
-        bug.status = prev;
-        renderBugTableBody();
-        updateSidebarBadges();
-        handleSupabaseError('Failed to update bug status', error);
-        return;
-      }
-      await logActivity(`marked bug ${newStatus}`, bug.title);
-      showToast(`Bug status updated to ${newStatus}`, 'success');
-    }
-
-    function openBugDetail(bugId) {
-      const b = db.bugs.find((x) => x.id === bugId);
-      if (!b) return;
-      const proj = getProjectById(b.project_id);
-      const reporter = getProfileById(b.reporter_id);
-
-      openModal(`
-        <div class="flex items-center justify-between px-5 py-4 border-b border-[#27272a] bg-[#09090b]/40">
-          <div class="flex items-center gap-2.5">
-            <span class="text-xs font-mono px-2 py-0.5 rounded bg-[#14151a] border border-[#27272a] text-emerald-400">${shortCode(b.id, 'BUG')}</span>
-            ${severityBadge(b.severity)}
-          </div>
-          <button type="button" onclick="closeModal()" class="p-1 text-zinc-500 hover:text-zinc-200"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-
-        <form id="bug-detail-form" class="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
-          <div>
-            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Bug Title *</label>
-            <input name="title" required value="${escapeHtml(b.title)}" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none" />
-            <p class="text-[11px] text-zinc-500 mt-1.5">
-              ${proj ? escapeHtml(proj.name) : 'No project'} · Reported by ${reporter ? escapeHtml(reporter.display_name) : 'Team'} · ${relativeTime(b.created_at)}
-            </p>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label class="block text-[11px] font-medium text-zinc-400 mb-1">Status</label>
-              <select name="status" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-2.5 py-2 text-xs text-zinc-100 outline-none">
-                ${BUG_STATUSES.map((st) => `<option value="${st}" ${b.status === st ? 'selected' : ''}>${st}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block text-[11px] font-medium text-zinc-400 mb-1">Severity</label>
-              <select name="severity" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-2.5 py-2 text-xs text-zinc-100 outline-none">
-                ${BUG_SEVERITIES.map((s) => `<option value="${s}" ${b.severity === s ? 'selected' : ''}>${s}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block text-[11px] font-medium text-zinc-400 mb-1">Build Version</label>
-              <input name="build_version" value="${escapeHtml(b.build_version || '')}" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-2.5 py-2 text-xs font-mono text-zinc-100 outline-none" />
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-mono uppercase tracking-wider text-zinc-500 mb-1.5">Reproduction Steps</label>
-            <textarea name="repro_steps" rows="4" class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/60 rounded-lg p-3 text-xs font-mono text-zinc-300 leading-relaxed outline-none">${escapeHtml(b.repro_steps || '')}</textarea>
-          </div>
-
-          <div>
-            <label class="block text-xs font-mono uppercase tracking-wider text-zinc-500 mb-1.5">Engineering Notes / Fix Log</label>
-            <textarea name="notes" rows="3" placeholder="Root cause, commit hash, or workaround..." class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/60 rounded-lg p-3 text-xs text-zinc-200 leading-relaxed outline-none">${escapeHtml(b.notes || '')}</textarea>
-          </div>
-
-          <div class="flex items-center justify-between pt-3 border-t border-[#27272a]">
-            <button type="button" onclick="confirmDeleteBug('${b.id}')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/25 transition">Delete Bug</button>
-            <div class="flex items-center gap-2">
-              <button type="button" onclick="closeModal()" class="px-3.5 py-2 rounded-lg text-xs font-medium bg-[#14151a] text-zinc-300 border border-[#27272a]">Close</button>
-              <button id="bug-save-btn" type="submit" class="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition">Save Updates</button>
-            </div>
-          </div>
-        </form>
-      `, 'max-w-2xl');
-
-      document.getElementById('bug-detail-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const btn = document.getElementById('bug-save-btn');
-        btn.disabled = true;
-
-        const payload = {
-          title: fd.get('title').trim(),
-          status: fd.get('status'),
-          severity: fd.get('severity'),
-          build_version: fd.get('build_version').trim() || 'v0.1',
-          repro_steps: fd.get('repro_steps').trim(),
-          notes: fd.get('notes').trim(),
-        };
-
-        const { error } = await sb.from('bugs').update(payload).eq('id', b.id);
-        if (error) {
-          handleSupabaseError('Failed to save bug', error);
-          btn.disabled = false;
-          return;
-        }
-        await logActivity(`updated bug (${payload.status})`, payload.title);
-        showToast('Bug updated', 'success');
-        closeModal();
-        await fetchAllData(false);
-      });
-    }
-
-    function openBugModal() {
-      openModal(`
-        <div class="flex items-center justify-between px-5 py-4 border-b border-[#27272a]">
-          <h3 class="text-sm font-semibold text-zinc-100">Log New Bug</h3>
-          <button type="button" onclick="closeModal()" class="p-1 text-zinc-500 hover:text-zinc-200"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-        <form id="bug-create-form" class="p-5 space-y-4">
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1">Bug Title *</label>
-            <input name="title" required placeholder="Concise summary of the defect" class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none" />
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Project</label>
-              <select name="project_id" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none">
-                <option value="">No Project</option>
-                ${db.projects.map((p) => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Severity</label>
-              <select name="severity" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none">
-                ${BUG_SEVERITIES.map((s) => `<option value="${s}" ${s === 'High' ? 'selected' : ''}>${s}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Build Version</label>
-              <input name="build_version" value="${escapeHtml(db.builds[0]?.version || 'v0.1')}" placeholder="v0.4.2-alpha" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 outline-none" />
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1">Repro Steps</label>
-            <textarea name="repro_steps" rows="3" placeholder="1. Launch build...\n2. Perform action...\nExpected vs Actual" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 outline-none resize-none"></textarea>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1">Engineering Notes</label>
-            <textarea name="notes" rows="2" placeholder="Optional logs or suspected script" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none resize-none"></textarea>
-          </div>
-          <div class="flex justify-end gap-2 pt-3 border-t border-[#27272a]">
-            <button type="button" onclick="closeModal()" class="px-3.5 py-2 rounded-lg text-xs font-medium bg-[#14151a] text-zinc-300 border border-[#27272a]">Cancel</button>
-            <button id="bug-create-btn" type="submit" class="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition">Log Bug</button>
-          </div>
-        </form>
-      `, 'max-w-xl');
-
-      document.getElementById('bug-create-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const btn = document.getElementById('bug-create-btn');
-        btn.disabled = true;
-
-        const payload = {
-          title: fd.get('title').trim(),
-          project_id: toNullableUuid(fd.get('project_id')),
-          severity: fd.get('severity'),
-          build_version: fd.get('build_version').trim() || 'v0.1',
-          status: 'Open',
-          repro_steps: fd.get('repro_steps').trim(),
-          notes: fd.get('notes').trim(),
-          reporter_id: currentProfile.id,
-        };
-
-        const { error } = await sb.from('bugs').insert(payload);
-        if (error) {
-          handleSupabaseError('Failed to log bug', error);
-          btn.disabled = false;
-          return;
-        }
-        await logActivity(`logged ${payload.severity} bug`, payload.title);
-        showToast('Bug logged', 'success');
-        closeModal();
-        await fetchAllData(false);
-      });
-    }
-
-    function confirmDeleteBug(bugId) {
-      const b = db.bugs.find((x) => x.id === bugId);
-      if (!b) return;
-      openConfirmModal({
-        title: 'Delete bug report?',
-        message: `Permanently delete "${b.title}" from Supabase?`,
-        confirmLabel: 'Delete Bug',
-        onConfirm: async () => {
-          const { error } = await sb.from('bugs').delete().eq('id', bugId);
-          if (error) {
-            handleSupabaseError('Failed to delete bug', error);
-            return;
-          }
-          await logActivity('deleted bug', b.title);
-          showToast('Bug deleted', 'info');
-          await fetchAllData(false);
-        },
-      });
-    }
-
-    // ==================== MODULE 5: BUILDS & DOCS VAULT ====================
-    function renderBuildsAndDocs(container) {
-      const isBuilds = filters.buildsTab === 'builds';
-      const filteredDocs = db.docs.filter((d) => filters.docsCategory === 'All' || d.category === filters.docsCategory);
-
-      container.innerHTML = `
-        <div class="space-y-5 animate-in">
-          <!-- Sub-tab Switcher & Action -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="inline-flex items-center bg-[#0f1014] border border-[#27272a] rounded-xl p-1 self-start">
-              <button
-                type="button"
-                onclick="filters.buildsTab = 'builds'; renderCurrentView();"
-                class="px-3.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 transition ${isBuilds ? 'bg-[#14151a] text-emerald-400 border border-[#27272a]' : 'text-zinc-400 hover:text-zinc-200 border border-transparent'}"
-              >
-                <i data-lucide="package" class="w-3.5 h-3.5"></i>
-                Playable Builds
-                <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-[#09090b] text-zinc-400">${db.builds.length}</span>
-              </button>
-              <button
-                type="button"
-                onclick="filters.buildsTab = 'docs'; renderCurrentView();"
-                class="px-3.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 transition ${!isBuilds ? 'bg-[#14151a] text-emerald-400 border border-[#27272a]' : 'text-zinc-400 hover:text-zinc-200 border border-transparent'}"
-              >
-                <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
-                Studio Docs Vault
-                <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-[#09090b] text-zinc-400">${db.docs.length}</span>
-              </button>
-            </div>
-
-            ${isBuilds ? `
-              <button type="button" onclick="openBuildModal()" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs transition shrink-0">
-                <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i> Register Build
-              </button>
-            ` : `
-              <button type="button" onclick="openDocModal()" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs transition shrink-0">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Resource
-              </button>
-            `}
-          </div>
-
-          ${isBuilds ? `
-            <!-- Playable Builds Registry -->
-            <div class="space-y-3">
-              ${db.builds.length === 0 ? `
-                <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-10 text-center text-xs text-zinc-500">
-                  No builds registered yet. Click "+ Register Build" to share a playable download link with your team.
-                </div>
-              ` : db.builds.map((b) => {
-                const proj = getProjectById(b.project_id);
-                return `
-                  <div class="bg-[#0f1014] border border-[#27272a] hover:border-zinc-700 rounded-xl p-4 sm:p-5 transition">
-                    <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                      <div class="space-y-2 min-w-0 flex-1">
-                        <div class="flex items-center gap-2.5 flex-wrap">
-                          <span class="font-mono text-sm font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded-md">${escapeHtml(b.version)}</span>
-                          <span class="text-sm font-semibold text-zinc-100">${proj ? escapeHtml(proj.name) : 'Studio Build'}</span>
-                          <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-[#14151a] border border-[#27272a] text-zinc-300">${escapeHtml(b.platform)}</span>
-                          <span class="text-[11px] font-mono text-zinc-500">${formatDateShort(b.created_at)}</span>
-                        </div>
-                        <p class="text-xs text-zinc-400 leading-relaxed whitespace-pre-line">${escapeHtml(b.changelog || 'No changelog notes provided.')}</p>
-                      </div>
-
-                      <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
-                        <button type="button" onclick="copyTextToClipboard('${escapeHtml(b.download_url)}', 'Build URL copied')" class="px-2.5 py-1.5 rounded-lg bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-xs text-zinc-300 inline-flex items-center gap-1.5 transition">
-                          <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy URL
-                        </button>
-                        <a href="${escapeHtml(safeUrl(b.download_url))}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-xs font-medium text-emerald-400 inline-flex items-center gap-1.5 transition">
-                          <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Open Link
-                        </a>
-                        <button type="button" onclick="openBuildModal('${b.id}')" title="Edit Build" class="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-[#14151a] transition">
-                          <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                        </button>
-                        <button type="button" onclick="confirmDeleteBuild('${b.id}')" title="Delete Build" class="p-1.5 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition">
-                          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          ` : `
-            <!-- Studio Docs Vault -->
-            <div class="space-y-4">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                ${['All', ...DOC_CATEGORIES].map((cat) => `
-                  <button
-                    type="button"
-                    onclick="filters.docsCategory = '${cat}'; renderCurrentView();"
-                    class="px-2.5 py-1 rounded-lg text-xs font-medium transition ${filters.docsCategory === cat ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-[#0f1014] text-zinc-400 hover:text-zinc-200 border border-[#27272a]'}"
-                  >${cat}</button>
-                `).join('')}
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                ${filteredDocs.length === 0 ? `
-                  <div class="col-span-full bg-[#0f1014] border border-[#27272a] rounded-xl p-10 text-center text-xs text-zinc-500">
-                    No resources found in this category.
-                  </div>
-                ` : filteredDocs.map((d) => {
-                  const proj = getProjectById(d.project_id);
-                  const icons = {
-                    GDD: 'file-text',
-                    'GitHub Repo': 'git-branch',
-                    'Art / 3D Assets': 'box',
-                    Audio: 'music',
-                    'Design Ref': 'palette',
-                    Other: 'link',
-                  };
-                  return `
-                    <div class="bg-[#0f1014] border border-[#27272a] hover:border-zinc-700 rounded-xl p-4 flex flex-col justify-between gap-4 transition">
-                      <div>
-                        <div class="flex items-start justify-between gap-2">
-                          <div class="flex items-center gap-2">
-                            <div class="w-7 h-7 rounded-lg bg-[#14151a] border border-[#27272a] flex items-center justify-center text-emerald-400 shrink-0">
-                              <i data-lucide="${icons[d.category] || 'link'}" class="w-3.5 h-3.5"></i>
-                            </div>
-                            <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-[#14151a] text-zinc-400 border border-[#27272a]">${escapeHtml(d.category)}</span>
-                          </div>
-                          <div class="flex items-center gap-1">
-                            <button type="button" onclick="openDocModal('${d.id}')" title="Edit Resource" class="p-1 text-zinc-600 hover:text-zinc-200 rounded transition">
-                              <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                            </button>
-                            <button type="button" onclick="confirmDeleteDoc('${d.id}')" title="Delete Resource" class="p-1 text-zinc-600 hover:text-red-400 rounded transition">
-                              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                            </button>
-                          </div>
-                        </div>
-                        <a href="${escapeHtml(safeUrl(d.url))}" target="_blank" rel="noopener noreferrer" class="block text-sm font-semibold text-zinc-100 hover:text-emerald-400 mt-3 transition">${escapeHtml(d.title)}</a>
-                        <p class="text-xs text-zinc-400 mt-1.5 leading-relaxed">${escapeHtml(d.notes || 'External studio documentation link.')}</p>
-                      </div>
-
-                      <div class="pt-3 border-t border-[#27272a] flex items-center justify-between gap-2">
-                        <span class="text-[11px] text-zinc-500 truncate">${proj ? escapeHtml(proj.name) : 'Studio-wide'}</span>
-                        <div class="flex items-center gap-1.5 shrink-0">
-                          <button type="button" onclick="copyTextToClipboard('${escapeHtml(d.url)}', 'Link copied')" class="p-1.5 rounded-md bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-zinc-400 hover:text-zinc-200 transition" title="Copy URL">
-                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                          </button>
-                          <a href="${escapeHtml(safeUrl(d.url))}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-md bg-[#14151a] hover:bg-emerald-500/15 hover:text-emerald-400 hover:border-emerald-500/30 border border-[#27272a] text-xs font-medium text-zinc-200 inline-flex items-center gap-1 transition">
-                            Open <i data-lucide="external-link" class="w-3 h-3"></i>
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-          `}
-        </div>
-      `;
-    }
-
-    function openBuildModal(buildId = null) {
-      const b = buildId ? db.builds.find((x) => x.id === buildId) : null;
-      const isEdit = Boolean(b);
-
-      openModal(`
-        <div class="flex items-center justify-between px-5 py-4 border-b border-[#27272a]">
-          <h3 class="text-sm font-semibold text-zinc-100">${isEdit ? 'Edit Build' : 'Register Playable Build'}</h3>
-          <button type="button" onclick="closeModal()" class="p-1 text-zinc-500 hover:text-zinc-200"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-        <form id="build-form" class="p-5 space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Project</label>
-              <select name="project_id" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none">
-                <option value="">Studio-wide</option>
-                ${db.projects.map((p) => `<option value="${p.id}" ${b?.project_id === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Version Tag *</label>
-              <input name="version" required value="${escapeHtml(b?.version || '')}" placeholder="v0.4.3-alpha" class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 outline-none" />
-            </div>
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Platform</label>
-              <select name="platform" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none">
-                ${BUILD_PLATFORMS.map((pl) => `<option value="${pl}" ${(b?.platform || 'Windows') === pl ? 'selected' : ''}>${pl}</option>`).join('')}
-              </select>
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1">Download URL *</label>
-            <input name="download_url" required value="${escapeHtml(b?.download_url || '')}" placeholder="https://drive.google.com/... or itch.io link" class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1">Changelog</label>
-            <textarea name="changelog" rows="3" placeholder="New features, bug fixes, playtest instructions..." class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none resize-none">${escapeHtml(b?.changelog || '')}</textarea>
-          </div>
-          <div class="flex justify-end gap-2 pt-3 border-t border-[#27272a]">
-            <button type="button" onclick="closeModal()" class="px-3.5 py-2 rounded-lg text-xs font-medium bg-[#14151a] text-zinc-300 border border-[#27272a]">Cancel</button>
-            <button id="build-submit-btn" type="submit" class="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition">${isEdit ? 'Save Build' : 'Register Build'}</button>
-          </div>
-        </form>
-      `, 'max-w-lg');
-
-      document.getElementById('build-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const btn = document.getElementById('build-submit-btn');
-        btn.disabled = true;
-
-        const payload = {
-          project_id: toNullableUuid(fd.get('project_id')),
-          version: fd.get('version').trim(),
-          platform: fd.get('platform'),
-          download_url: fd.get('download_url').trim(),
-          changelog: fd.get('changelog').trim(),
-        };
-
-        if (isEdit) {
-          const { error } = await sb.from('builds').update(payload).eq('id', b.id);
-          if (error) {
-            handleSupabaseError('Failed to update build', error);
-            btn.disabled = false;
-            return;
-          }
-          await logActivity('updated build', `${payload.version} (${payload.platform})`);
-          showToast(`Updated build ${payload.version}`, 'success');
-        } else {
-          const { error } = await sb.from('builds').insert(payload);
-          if (error) {
-            handleSupabaseError('Failed to register build', error);
-            btn.disabled = false;
-            return;
-          }
-          await logActivity('registered build', `${payload.version} (${payload.platform})`);
-          showToast(`Registered build ${payload.version}`, 'success');
-        }
-        closeModal();
-        await fetchAllData(false);
-      });
-    }
-
-    function confirmDeleteBuild(buildId) {
-      const b = db.builds.find((x) => x.id === buildId);
-      if (!b) return;
-      openConfirmModal({
-        title: `Remove build ${b.version}?`,
-        message: 'This deletes the build entry from Supabase.',
-        confirmLabel: 'Delete Build',
-        onConfirm: async () => {
-          const { error } = await sb.from('builds').delete().eq('id', buildId);
-          if (error) {
-            handleSupabaseError('Failed to delete build', error);
-            return;
-          }
-          await logActivity('removed build', b.version);
-          showToast(`Removed ${b.version}`, 'info');
-          await fetchAllData(false);
-        },
-      });
-    }
-
-    function openDocModal(docId = null) {
-      const d = docId ? db.docs.find((x) => x.id === docId) : null;
-      const isEdit = Boolean(d);
-
-      openModal(`
-        <div class="flex items-center justify-between px-5 py-4 border-b border-[#27272a]">
-          <h3 class="text-sm font-semibold text-zinc-100">${isEdit ? 'Edit Resource' : 'Add Studio Vault Resource'}</h3>
-          <button type="button" onclick="closeModal()" class="p-1 text-zinc-500 hover:text-zinc-200"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-        <form id="doc-form" class="p-5 space-y-4">
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1">Resource Title *</label>
-            <input name="title" required value="${escapeHtml(d?.title || '')}" placeholder="e.g., Master GDD or 3D Asset Drive" class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none" />
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Project</label>
-              <select name="project_id" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none">
-                <option value="">Studio-wide</option>
-                ${db.projects.map((p) => `<option value="${p.id}" ${d?.project_id === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Category</label>
-              <select name="category" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none">
-                ${DOC_CATEGORIES.map((c) => `<option value="${c}" ${(d?.category || 'GDD') === c ? 'selected' : ''}>${c}</option>`).join('')}
-              </select>
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1">URL *</label>
-            <input name="url" required value="${escapeHtml(d?.url || '')}" placeholder="https://notion.so/... or https://github.com/..." class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1">Notes</label>
-            <textarea name="notes" rows="2" placeholder="What does this link contain?" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none resize-none">${escapeHtml(d?.notes || '')}</textarea>
-          </div>
-          <div class="flex justify-end gap-2 pt-3 border-t border-[#27272a]">
-            <button type="button" onclick="closeModal()" class="px-3.5 py-2 rounded-lg text-xs font-medium bg-[#14151a] text-zinc-300 border border-[#27272a]">Cancel</button>
-            <button id="doc-submit-btn" type="submit" class="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition">${isEdit ? 'Save Resource' : 'Add Resource'}</button>
-          </div>
-        </form>
-      `, 'max-w-lg');
-
-      document.getElementById('doc-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const btn = document.getElementById('doc-submit-btn');
-        btn.disabled = true;
-
-        const payload = {
-          title: fd.get('title').trim(),
-          project_id: toNullableUuid(fd.get('project_id')),
-          category: fd.get('category'),
-          url: fd.get('url').trim(),
-          notes: fd.get('notes').trim(),
-        };
-
-        if (isEdit) {
-          const { error } = await sb.from('docs').update(payload).eq('id', d.id);
-          if (error) {
-            handleSupabaseError('Failed to update resource', error);
-            btn.disabled = false;
-            return;
-          }
-          await logActivity('updated vault resource', payload.title);
-          showToast('Resource updated', 'success');
-        } else {
-          const { error } = await sb.from('docs').insert(payload);
-          if (error) {
-            handleSupabaseError('Failed to add resource', error);
-            btn.disabled = false;
-            return;
-          }
-          await logActivity('added vault resource', payload.title);
-          showToast(`Added "${payload.title}"`, 'success');
-        }
-        closeModal();
-        await fetchAllData(false);
-      });
-    }
-
-    function confirmDeleteDoc(docId) {
-      const d = db.docs.find((x) => x.id === docId);
-      if (!d) return;
-      openConfirmModal({
-        title: `Delete "${d.title}"?`,
-        message: 'Remove this link from the Studio Docs Vault?',
-        confirmLabel: 'Delete',
-        onConfirm: async () => {
-          const { error } = await sb.from('docs').delete().eq('id', docId);
-          if (error) {
-            handleSupabaseError('Failed to delete resource', error);
-            return;
-          }
-          await logActivity('removed vault resource', d.title);
-          showToast('Resource removed', 'info');
-          await fetchAllData(false);
-        },
-      });
-    }
-
-    // ==================== MODULE 6: TEAM & ACCESS ====================
-    function renderTeamAccess(container) {
-      const isAdmin = currentProfile.access_role === 'Admin';
-
-      container.innerHTML = `
-        <div class="space-y-6 animate-in">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h3 class="text-sm font-semibold text-zinc-200">Studio Team Directory (${db.profiles.length})</h3>
-              <p class="text-xs text-zinc-500 mt-0.5">Live synced from <code class="font-mono text-zinc-400">public.profiles</code>. ${isAdmin ? 'As Admin, you can update any teammate’s title or role.' : 'You can edit your own display name and studio title.'}</p>
-            </div>
-            <button type="button" onclick="exportStudioBackup()" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-xs font-medium text-zinc-200 transition shrink-0">
-              <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-400"></i> Export Studio Backup (.json)
-            </button>
-          </div>
-
-          <!-- Team Cards Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            ${db.profiles.map((m) => {
-              const openTasksCount = db.tasks.filter((t) => t.assignee_id === m.id && t.status !== 'Done').length;
-              const isSelf = m.id === currentProfile.id;
-              const canEdit = isSelf || isAdmin;
-              return `
-                <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-4 flex flex-col justify-between gap-4">
-                  <div class="flex items-start justify-between gap-3">
-                    <div class="flex items-center gap-3 min-w-0">
-                      <div class="w-10 h-10 rounded-lg ${m.access_role === 'Admin' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' : 'bg-[#14151a] border-[#27272a] text-zinc-300'} border font-mono text-xs font-semibold flex items-center justify-center shrink-0">
-                        ${getInitials(m.display_name || m.username)}
-                      </div>
-                      <div class="min-w-0">
-                        <div class="flex items-center gap-1.5">
-                          <h4 class="text-sm font-semibold text-zinc-100 truncate">${escapeHtml(m.display_name)}</h4>
-                          ${isSelf ? '<span class="text-[10px] font-mono text-zinc-500">(You)</span>' : ''}
-                        </div>
-                        <p class="text-xs font-mono text-zinc-500 truncate">@${escapeHtml(m.username)}</p>
-                      </div>
-                    </div>
-                    <span class="shrink-0 text-[10px] font-mono px-2 py-0.5 rounded-md border ${m.access_role === 'Admin' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25' : 'bg-[#14151a] text-zinc-400 border-[#27272a]'}">
-                      ${escapeHtml(m.access_role)}
-                    </span>
-                  </div>
-
-                  <div class="text-xs text-zinc-400 flex items-center gap-1.5">
-                    <i data-lucide="cpu" class="w-3.5 h-3.5 text-zinc-500 shrink-0"></i>
-                    <span class="truncate">${escapeHtml(m.studio_title || 'Developer')}</span>
-                  </div>
-
-                  <div class="pt-3 border-t border-[#27272a] flex items-center justify-between gap-2">
-                    <span class="text-[11px] font-mono text-zinc-400">
-                      <strong class="text-zinc-200">${openTasksCount}</strong> open task${openTasksCount === 1 ? '' : 's'}
-                    </span>
-                    ${canEdit ? `
-                      <button type="button" onclick="openEditProfileModal('${m.id}')" class="px-2.5 py-1 rounded-md bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-[11px] font-medium text-zinc-300 hover:text-emerald-400 transition">
-                        Edit Profile
-                      </button>
-                    ` : ''}
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-
-          <!-- Guide: How to Add a New Team Member -->
-          <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-5">
-            <div class="flex items-start gap-3.5">
-              <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 shrink-0">
-                <i data-lucide="shield-check" class="w-4 h-4"></i>
-              </div>
-              <div class="space-y-2 text-xs text-zinc-400 leading-relaxed">
-                <h4 class="text-sm font-semibold text-zinc-100">How to Add a New Team Member</h4>
-                <p>
-                  Because public signups are disabled to keep Reptile Studio strictly internal, new accounts are invited directly inside your Supabase Dashboard:
-                </p>
-                <ol class="list-decimal list-inside space-y-1 text-zinc-300">
-                  <li>Open Supabase Dashboard → <span class="font-mono text-emerald-400">Authentication → Users</span>.</li>
-                  <li>Click <span class="font-medium text-zinc-100">Add user → Invite user</span> (or Create new user) with their Gmail address.</li>
-                  <li>When they sign in to this portal for the first time, they will be prompted to create their profile automatically—no manual SQL required.</li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function openEditProfileModal(profileId) {
-      const m = getProfileById(profileId);
-      if (!m) return;
-      const isAdmin = currentProfile.access_role === 'Admin';
-      const isSelf = m.id === currentProfile.id;
-      if (!isSelf && !isAdmin) {
-        showToast('Only Admins can edit other team members.', 'error');
-        return;
-      }
-
-      openModal(`
-        <div class="flex items-center justify-between px-5 py-4 border-b border-[#27272a]">
-          <h3 class="text-sm font-semibold text-zinc-100">Edit Profile — @${escapeHtml(m.username)}</h3>
-          <button type="button" onclick="closeModal()" class="p-1 text-zinc-500 hover:text-zinc-200"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-        <form id="edit-profile-form" class="p-5 space-y-4">
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1">Display Name *</label>
-            <input name="display_name" required value="${escapeHtml(m.display_name)}" class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-zinc-400 mb-1">Studio Title / Discipline *</label>
-            <input name="studio_title" required value="${escapeHtml(m.studio_title || '')}" placeholder="e.g., Lead Dev & Shaders" class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none" />
-          </div>
-          ${isAdmin ? `
-            <div>
-              <label class="block text-xs font-medium text-zinc-400 mb-1">Access Role</label>
-              <select name="access_role" class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none">
-                <option value="Member" ${m.access_role === 'Member' ? 'selected' : ''}>Member</option>
-                <option value="Admin" ${m.access_role === 'Admin' ? 'selected' : ''}>Admin</option>
-              </select>
-            </div>
-          ` : ''}
-          <div class="p-2.5 rounded-lg bg-[#09090b] border border-[#27272a] flex items-center justify-between gap-2">
-            <span class="text-[10px] font-mono text-zinc-500 truncate">UID: ${escapeHtml(m.id)}</span>
-            <button type="button" onclick="copyTextToClipboard('${escapeHtml(m.id)}', 'UID copied')" class="text-[10px] font-mono text-emerald-400 hover:text-emerald-300 shrink-0">Copy</button>
-          </div>
-          <div class="flex justify-end gap-2 pt-3 border-t border-[#27272a]">
-            <button type="button" onclick="closeModal()" class="px-3.5 py-2 rounded-lg text-xs font-medium bg-[#14151a] text-zinc-300 border border-[#27272a]">Cancel</button>
-            <button id="profile-save-btn" type="submit" class="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition">Save Profile</button>
-          </div>
-        </form>
-      `, 'max-w-md');
-
-      document.getElementById('edit-profile-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const btn = document.getElementById('profile-save-btn');
-        btn.disabled = true;
-
-        const payload = {
-          display_name: fd.get('display_name').trim(),
-          studio_title: fd.get('studio_title').trim(),
-        };
-        if (isAdmin && fd.get('access_role')) {
-          payload.access_role = fd.get('access_role');
-        }
-
-        const { error } = await sb.from('profiles').update(payload).eq('id', m.id);
-        if (error) {
-          handleSupabaseError('Failed to update profile', error);
-          btn.disabled = false;
-          return;
-        }
-        await logActivity('updated profile', payload.display_name);
-        showToast('Profile saved', 'success');
-        closeModal();
-        await fetchAllData(false);
-      });
-    }
-
-    function exportStudioBackup() {
-      try {
-        const snapshot = {
-          exported_at: new Date().toISOString(),
-          studio: 'Reptile Studio',
-          ...db,
-        };
-        const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `reptile-studio-backup-${new Date().toISOString().slice(0, 10)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast('Downloaded studio backup JSON', 'success');
-      } catch (err) {
-        console.error(err);
-        showToast('Failed to export backup', 'error');
-      }
-    }
-
-    // ==================== MODULE 7: GLOBAL CTRL+K QUICK SEARCH ====================
-    function openCommandPalette() {
-      const root = document.getElementById('cmd-root');
-      const input = document.getElementById('cmd-input');
-      root.classList.remove('hidden');
-      root.classList.add('flex');
-      input.value = '';
-      renderCommandResults('');
-      setTimeout(() => input.focus(), 30);
-    }
-
-    function closeCommandPalette() {
-      const root = document.getElementById('cmd-root');
-      root.classList.add('hidden');
-      root.classList.remove('flex');
-    }
-
-    document.getElementById('cmd-input').addEventListener('input', (e) => {
-      renderCommandResults(e.target.value);
-    });
-
-    function renderCommandResults(rawQuery) {
-      const q = rawQuery.trim().toLowerCase();
-      const box = document.getElementById('cmd-results');
-      const items = [];
-
-      db.projects.forEach((p) => {
-        if (!q || p.name.toLowerCase().includes(q) || (p.engine || '').toLowerCase().includes(q) || p.status.toLowerCase().includes(q)) {
-          items.push({
-            group: 'Project',
-            icon: 'folder-kanban',
-            title: p.name,
-            meta: `${p.status} · ${p.engine}`,
-            action: () => { closeCommandPalette(); navigateTo('projects'); openProjectDetail(p.id); },
-          });
-        }
-      });
-
-      db.tasks.forEach((t) => {
-        const code = shortCode(t.id, 'TSK');
-        if (!q || t.title.toLowerCase().includes(q) || code.toLowerCase().includes(q) || t.discipline.toLowerCase().includes(q)) {
-          items.push({
-            group: 'Task',
-            icon: 'columns-3',
-            title: `${code} — ${t.title}`,
-            meta: `${t.status} · ${t.discipline}`,
-            action: () => { closeCommandPalette(); navigateTo('board'); openTaskModal(t.id); },
-          });
-        }
-      });
-
-      db.bugs.forEach((b) => {
-        const code = shortCode(b.id, 'BUG');
-        if (!q || b.title.toLowerCase().includes(q) || code.toLowerCase().includes(q) || b.severity.toLowerCase().includes(q) || (b.build_version || '').toLowerCase().includes(q)) {
-          items.push({
-            group: 'Bug',
-            icon: 'bug',
-            title: `${code} — ${b.title}`,
-            meta: `${b.severity} · ${b.status}`,
-            action: () => { closeCommandPalette(); navigateTo('bugs'); openBugDetail(b.id); },
-          });
-        }
-      });
-
-      db.builds.forEach((b) => {
-        if (!q || b.version.toLowerCase().includes(q) || b.platform.toLowerCase().includes(q) || (b.changelog || '').toLowerCase().includes(q)) {
-          items.push({
-            group: 'Build',
-            icon: 'package',
-            title: `${b.version} (${b.platform})`,
-            meta: formatDateShort(b.created_at),
-            action: () => { closeCommandPalette(); filters.buildsTab = 'builds'; navigateTo('builds'); },
-          });
-        }
-      });
-
-      db.docs.forEach((d) => {
-        if (!q || d.title.toLowerCase().includes(q) || d.category.toLowerCase().includes(q) || (d.notes || '').toLowerCase().includes(q)) {
-          items.push({
-            group: 'Vault Doc',
-            icon: 'book-open',
-            title: d.title,
-            meta: d.category,
-            action: () => { closeCommandPalette(); filters.buildsTab = 'docs'; navigateTo('builds'); },
-          });
-        }
-      });
-
-      if (items.length === 0) {
-        box.innerHTML = `<div class="py-8 text-center text-xs text-zinc-500">No matches found for "${escapeHtml(rawQuery)}".</div>`;
-        return;
-      }
-
-      const limited = items.slice(0, 14);
-      window.__cmdActions = limited.map((i) => i.action);
-
-      box.innerHTML = limited.map((item, idx) => `
-        <button
-          type="button"
-          onclick="window.__cmdActions[${idx}]()"
-          class="w-full px-3 py-2.5 rounded-lg hover:bg-[#14151a] flex items-center justify-between gap-3 text-left transition group"
-        >
-          <div class="flex items-center gap-2.5 min-w-0">
-            <i data-lucide="${item.icon}" class="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 shrink-0"></i>
-            <div class="min-w-0">
-              <div class="text-xs font-medium text-zinc-200 truncate">${escapeHtml(item.title)}</div>
-              <div class="text-[10px] font-mono text-zinc-500">${escapeHtml(item.group)} · ${escapeHtml(item.meta)}</div>
-            </div>
-          </div>
-          <i data-lucide="corner-down-left" class="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-300 shrink-0"></i>
-        </button>
-      `).join('');
-      refreshIcons();
-    }
-
+    currentProfile = profile;
+    // ... existing code ... -->
     // ==================== BOOTSTRAP ====================
     (async function bootApp() {
       try {
         const initialized = initSupabaseClient();
+        checkOAuthRedirectErrors();
         if (!initialized) {
           showScreen('login-view');
           updateLoginConfigUI();
@@ -3699,4 +1189,5 @@
     })();
   </script>
 </body>
+
 </html>
