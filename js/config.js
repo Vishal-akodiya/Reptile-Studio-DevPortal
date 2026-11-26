@@ -1,9 +1,13 @@
-// Hardcoded Supabase Project Credentials (safe for public frontend with RLS + whitelist)
 const SUPABASE_URL = 'https://fprpvayqstsnawbmputz.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_sXGycE_FBouIbcK-OhTwXA_Y0Vwin10';
 
 const LS_URL_KEY = 'reptile_sb_url';
 const LS_KEY_KEY = 'reptile_sb_key';
+
+// Storage limits (Supabase Free Plan: 50 MB max file, 1 GB total storage)
+const STORAGE_BUCKET = 'studio-media';
+const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;    // 50 MB
+const MAX_STORAGE_BYTES = 1024 * 1024 * 1024; // 1 GB (1024 MB)
 
 let sb = null;
 let authSubscription = null;
@@ -23,7 +27,11 @@ const db = {
     bugs: [],
     builds: [],
     docs: [],
+    assets: [],
+    comments: [],
+    allowed_emails: [],
     activity_logs: [],
+    storage: { used_bytes: 0, file_count: 0, max_bytes: MAX_STORAGE_BYTES },
 };
 
 const filters = {
@@ -37,6 +45,10 @@ const filters = {
     bugSeverity: 'All',
     bugStatus: 'All',
     bugSearch: '',
+    assetProject: 'All',
+    assetType: 'All',
+    assetStatus: 'All',
+    assetSearch: '',
     buildsTab: 'builds',
     docsCategory: 'All',
     myTasksShowDone: false,
@@ -50,6 +62,8 @@ const BUG_SEVERITIES = ['Blocker', 'High', 'Medium', 'Low'];
 const BUG_STATUSES = ['Open', 'In Progress', 'Fixed', 'Closed'];
 const BUILD_PLATFORMS = ['Windows', 'Android', 'WebGL', 'Linux', 'macOS'];
 const DOC_CATEGORIES = ['GDD', 'GitHub Repo', 'Art / 3D Assets', 'Audio', 'Design Ref', 'Other'];
+const ASSET_TYPES = ['3D Model', 'Texture / Shader', 'Audio / SFX', 'Animation', 'UI / Icon', 'VFX / Other'];
+const ASSET_STATUSES = ['Concept', 'Greybox', 'WIP', 'In-Engine', 'Final'];
 
 function isHardcodedConfig() {
     const url = (SUPABASE_URL || '').trim();
@@ -91,6 +105,17 @@ function initSupabaseClient() {
         },
     });
     return true;
+}
+
+function isAdmin() {
+    return currentProfile?.access_role === 'Admin';
+}
+
+function formatBytes(bytes) {
+    const num = Number(bytes) || 0;
+    if (num < 1024) return `${num} B`;
+    if (num < 1024 * 1024) return `${(num / 1024).toFixed(1)} KB`;
+    return `${(num / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function toNullableDate(val) {

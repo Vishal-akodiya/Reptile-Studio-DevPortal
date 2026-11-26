@@ -1,13 +1,11 @@
 function getProjectProgress(project) {
     const pTasks = db.tasks.filter((t) => t.project_id === project.id);
     if (pTasks.length > 0) {
-        const done = pTasks.filter((t) => t.status === 'Done').length;
-        return Math.round((done / pTasks.length) * 100);
+        return Math.round((pTasks.filter((t) => t.status === 'Done').length / pTasks.length) * 100);
     }
     const ms = Array.isArray(project.milestones) ? project.milestones : [];
     if (ms.length > 0) {
-        const done = ms.filter((m) => m.done).length;
-        return Math.round((done / ms.length) * 100);
+        return Math.round((ms.filter((m) => m.done).length / ms.length) * 100);
     }
     return 0;
 }
@@ -32,8 +30,13 @@ function renderCurrentView() {
         case 'builds':
             main.innerHTML = renderBuildsDocsView();
             break;
+        case 'assets':
+            main.innerHTML = renderAssetsView();
+            bindAssetsEvents();
+            break;
         case 'team':
             main.innerHTML = renderTeamView();
+            bindTeamEvents();
             break;
         case 'overview':
         default:
@@ -49,11 +52,7 @@ function renderOverviewView() {
     const openTasks = db.tasks.filter((t) => t.status !== 'Done').length;
     const openBugs = db.bugs.filter((b) => b.status === 'Open' || b.status === 'In Progress').length;
     const blockers = db.bugs.filter((b) => b.severity === 'Blocker' && b.status !== 'Fixed' && b.status !== 'Closed').length;
-
-    const myTasks = db.tasks.filter((t) => {
-        if (t.assignee_id !== currentProfile.id) return false;
-        return filters.myTasksShowDone ? true : t.status !== 'Done';
-    });
+    const myTasks = db.tasks.filter((t) => t.assignee_id === currentProfile.id && (filters.myTasksShowDone || t.status !== 'Done'));
 
     return `
     <div class="space-y-6 animate-in">
@@ -71,8 +70,8 @@ function renderOverviewView() {
           <div class="text-2xl font-semibold text-amber-400 mt-1">${openBugs}</div>
         </div>
         <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-4">
-          <div class="text-[11px] font-mono text-zinc-500 uppercase">Blockers</div>
-          <div class="text-2xl font-semibold ${blockers > 0 ? 'text-red-400' : 'text-zinc-300'} mt-1">${blockers}</div>
+          <div class="text-[11px] font-mono text-zinc-500 uppercase">Blockers / Storage</div>
+          <div class="text-2xl font-semibold ${blockers > 0 ? 'text-red-400' : 'text-zinc-300'} mt-1">${blockers} <span class="text-xs font-mono text-zinc-500 font-normal">· ${formatBytes(db.storage.used_bytes)}</span></div>
         </div>
       </div>
 
@@ -84,27 +83,25 @@ function renderOverviewView() {
               <button type="button" onclick="openProjectModal()" class="text-xs text-emerald-400 hover:text-emerald-300 font-medium">+ Add Project</button>
             </div>
             ${db.projects.length
-            ? `<div class="space-y-3.5">
-                    ${db.projects
+            ? `<div class="space-y-3.5">${db.projects
                 .map((p) => {
                     const pct = getProjectProgress(p);
                     return `
-                          <div class="p-3.5 rounded-lg bg-[#09090b] border border-[#27272a]">
-                            <div class="flex items-center justify-between gap-2 mb-2">
-                              <div class="min-w-0">
-                                <div class="text-sm font-medium text-zinc-100 truncate">${escapeHtml(p.name)}</div>
-                                <div class="text-[11px] font-mono text-zinc-500">${escapeHtml(p.engine || 'Unity')} · ${escapeHtml(p.status)}</div>
-                              </div>
-                              <span class="text-xs font-mono text-emerald-400">${pct}%</span>
+                        <div class="p-3.5 rounded-lg bg-[#09090b] border border-[#27272a]">
+                          <div class="flex items-center justify-between gap-2 mb-2">
+                            <div class="min-w-0">
+                              <div class="text-sm font-medium text-zinc-100 truncate">${escapeHtml(p.name)}</div>
+                              <div class="text-[11px] font-mono text-zinc-500">${escapeHtml(p.engine || 'Unity')} · ${escapeHtml(p.status)}</div>
                             </div>
-                            <div class="w-full h-1.5 rounded-full bg-zinc-900 overflow-hidden">
-                              <div class="h-full bg-emerald-500 rounded-full transition-all" style="width:${pct}%"></div>
-                            </div>
-                          </div>`;
+                            <span class="text-xs font-mono text-emerald-400">${pct}%</span>
+                          </div>
+                          <div class="w-full h-1.5 rounded-full bg-zinc-900 overflow-hidden">
+                            <div class="h-full bg-emerald-500 rounded-full" style="width:${pct}%"></div>
+                          </div>
+                        </div>`;
                 })
-                .join('')}
-                  </div>`
-            : `<p class="text-xs text-zinc-500">No projects yet. Click "+ Add Project" to create your first game.</p>`
+                .join('')}</div>`
+            : `<p class="text-xs text-zinc-500">No projects yet.</p>`
         }
           </div>
 
@@ -117,21 +114,19 @@ function renderOverviewView() {
               </label>
             </div>
             ${myTasks.length
-            ? `<div class="divide-y divide-[#27272a]">
-                    ${myTasks
+            ? `<div class="divide-y divide-[#27272a]">${myTasks
                 .map((t) => {
                     const isDone = t.status === 'Done';
                     return `
-                          <div class="py-2.5 flex items-center justify-between gap-3">
-                            <label class="flex items-center gap-2.5 min-w-0 cursor-pointer">
-                              <input type="checkbox" data-quick-task-id="${t.id}" ${isDone ? 'checked' : ''} class="rounded border-zinc-700 bg-zinc-900" />
-                              <span class="text-xs ${isDone ? 'line-through text-zinc-500' : 'text-zinc-200'} truncate">${escapeHtml(t.title)}</span>
-                            </label>
-                            <span class="text-[10px] font-mono text-zinc-500 shrink-0">${escapeHtml(t.status)}</span>
-                          </div>`;
+                        <div class="py-2.5 flex items-center justify-between gap-3">
+                          <label class="flex items-center gap-2.5 min-w-0 cursor-pointer">
+                            <input type="checkbox" data-quick-task-id="${t.id}" ${isDone ? 'checked' : ''} class="rounded border-zinc-700 bg-zinc-900" />
+                            <span class="text-xs ${isDone ? 'line-through text-zinc-500' : 'text-zinc-200'} truncate">${escapeHtml(t.title)}</span>
+                          </label>
+                          <span class="text-[10px] font-mono text-zinc-500 shrink-0">${escapeHtml(t.status)}</span>
+                        </div>`;
                 })
-                .join('')}
-                  </div>`
+                .join('')}</div>`
             : `<p class="text-xs text-zinc-500">No assigned tasks matching this filter.</p>`
         }
           </div>
@@ -140,19 +135,17 @@ function renderOverviewView() {
         <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-5">
           <h3 class="text-sm font-semibold text-zinc-100 mb-3">Studio Activity</h3>
           ${db.activity_logs.length
-            ? `<div class="space-y-3">
-                  ${db.activity_logs
+            ? `<div class="space-y-3">${db.activity_logs
                 .slice(0, 14)
                 .map(
                     (a) => `
-                      <div class="text-xs border-b border-[#27272a]/70 pb-2.5 last:border-none">
-                        <span class="font-medium text-emerald-400">${escapeHtml(a.actor_name)}</span>
-                        <span class="text-zinc-400"> ${escapeHtml(a.action)}</span>
-                        <span class="text-zinc-200 font-medium"> "${escapeHtml(a.target)}"</span>
-                      </div>`
+                    <div class="text-xs border-b border-[#27272a]/70 pb-2.5 last:border-none">
+                      <span class="font-medium text-emerald-400">${escapeHtml(a.actor_name)}</span>
+                      <span class="text-zinc-400"> ${escapeHtml(a.action)}</span>
+                      <span class="text-zinc-200 font-medium"> "${escapeHtml(a.target)}"</span>
+                    </div>`
                 )
-                .join('')}
-                </div>`
+                .join('')}</div>`
             : `<p class="text-xs text-zinc-500">Activity will appear here as your team updates items.</p>`
         }
         </div>
@@ -166,11 +159,9 @@ function bindOverviewEvents() {
         filters.myTasksShowDone = e.target.checked;
         renderCurrentView();
     });
-
     document.querySelectorAll('[data-quick-task-id]').forEach((cb) => {
         cb.addEventListener('change', async (e) => {
-            const nextStatus = e.target.checked ? 'Done' : 'In Progress';
-            await updateTaskStatus(e.target.dataset.quickTaskId, nextStatus);
+            await updateTaskStatus(e.target.dataset.quickTaskId, e.target.checked ? 'Done' : 'In Progress');
         });
     });
 }
@@ -200,61 +191,48 @@ function renderProjectsView() {
       </div>
 
       ${list.length
-            ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              ${list
+            ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${list
                 .map((p) => {
                     const pct = getProjectProgress(p);
                     const ms = Array.isArray(p.milestones) ? p.milestones : [];
                     return `
-                    <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-5 flex flex-col justify-between gap-4">
-                      <div>
-                        <div class="flex items-start justify-between gap-2">
-                          <div>
-                            <h3 class="text-base font-semibold text-zinc-100">${escapeHtml(p.name)}</h3>
-                            <p class="text-xs font-mono text-zinc-500 mt-0.5">${escapeHtml(p.engine || 'Unity')} · ${escapeHtml(p.status)}</p>
-                          </div>
-                          <div class="flex items-center gap-1.5">
-                            <button type="button" onclick="openProjectModal('${p.id}')" class="px-2.5 py-1 rounded bg-[#14151a] border border-[#27272a] text-xs text-zinc-300 hover:text-white">Edit</button>
-                            <button type="button" data-del-proj="${p.id}" data-del-proj-name="${escapeHtml(p.name)}" class="px-2 py-1 rounded bg-[#14151a] border border-[#27272a] text-xs text-red-400 hover:bg-red-500/10">Delete</button>
-                          </div>
+                  <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-5 flex flex-col justify-between gap-4">
+                    <div>
+                      <div class="flex items-start justify-between gap-2">
+                        <div>
+                          <h3 class="text-base font-semibold text-zinc-100">${escapeHtml(p.name)}</h3>
+                          <p class="text-xs font-mono text-zinc-500 mt-0.5">${escapeHtml(p.engine || 'Unity')} · ${escapeHtml(p.status)}</p>
                         </div>
-
-                        ${p.gdd_summary ? `<p class="text-xs text-zinc-400 mt-3 leading-relaxed">${escapeHtml(p.gdd_summary)}</p>` : ''}
-
-                        ${ms.length
+                        <div class="flex items-center gap-1.5">
+                          <button type="button" onclick="openProjectModal('${p.id}')" class="px-2.5 py-1 rounded bg-[#14151a] border border-[#27272a] text-xs text-zinc-300 hover:text-white">Edit</button>
+                          ${isAdmin() ? `<button type="button" data-del-proj="${p.id}" data-del-proj-name="${escapeHtml(p.name)}" class="px-2 py-1 rounded bg-[#14151a] border border-[#27272a] text-xs text-red-400 hover:bg-red-500/10">Delete</button>` : ''}
+                        </div>
+                      </div>
+                      ${p.gdd_summary ? `<p class="text-xs text-zinc-400 mt-3 leading-relaxed">${escapeHtml(p.gdd_summary)}</p>` : ''}
+                      ${ms.length
                             ? `<div class="mt-4 space-y-1.5">
-                                <div class="text-[10px] font-mono uppercase text-zinc-500">Milestones</div>
-                                ${ms
+                              <div class="text-[10px] font-mono uppercase text-zinc-500">Milestones</div>
+                              ${ms
                                 .map(
                                     (m, idx) => `
-                                    <label class="flex items-center gap-2 text-xs cursor-pointer">
-                                      <input type="checkbox" data-ms-proj="${p.id}" data-ms-idx="${idx}" ${m.done ? 'checked' : ''} class="rounded border-zinc-700 bg-zinc-900" />
-                                      <span class="${m.done ? 'line-through text-zinc-500' : 'text-zinc-300'}">${escapeHtml(m.title)}</span>
-                                    </label>`
+                                  <label class="flex items-center gap-2 text-xs cursor-pointer">
+                                    <input type="checkbox" data-ms-proj="${p.id}" data-ms-idx="${idx}" ${m.done ? 'checked' : ''} class="rounded border-zinc-700 bg-zinc-900" />
+                                    <span class="${m.done ? 'line-through text-zinc-500' : 'text-zinc-300'}">${escapeHtml(m.title)}</span>
+                                  </label>`
                                 )
                                 .join('')}
-                              </div>`
+                            </div>`
                             : ''
                         }
-                      </div>
-
-                      <div>
-                        <div class="flex justify-between text-[11px] font-mono text-zinc-400 mb-1">
-                          <span>Progress</span>
-                          <span>${pct}%</span>
-                        </div>
-                        <div class="w-full h-1.5 rounded-full bg-zinc-900 overflow-hidden">
-                          <div class="h-full bg-emerald-500 rounded-full" style="width:${pct}%"></div>
-                        </div>
-                        ${p.repo_url
-                            ? `<a href="${escapeHtml(safeUrl(p.repo_url))}" target="_blank" rel="noopener noreferrer" class="inline-block mt-3 text-xs text-emerald-400 hover:underline">Open Repo / Link ↗</a>`
-                            : ''
-                        }
-                      </div>
-                    </div>`;
+                    </div>
+                    <div>
+                      <div class="flex justify-between text-[11px] font-mono text-zinc-400 mb-1"><span>Progress</span><span>${pct}%</span></div>
+                      <div class="w-full h-1.5 rounded-full bg-zinc-900 overflow-hidden"><div class="h-full bg-emerald-500 rounded-full" style="width:${pct}%"></div></div>
+                      ${p.repo_url ? `<a href="${escapeHtml(safeUrl(p.repo_url))}" target="_blank" rel="noopener noreferrer" class="inline-block mt-3 text-xs text-emerald-400 hover:underline">Open Repo / Link ↗</a>` : ''}
+                    </div>
+                  </div>`;
                 })
-                .join('')}
-            </div>`
+                .join('')}</div>`
             : `<div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-8 text-center text-xs text-zinc-500">No projects match your filter.</div>`
         }
     </div>
@@ -279,7 +257,7 @@ function bindProjectsEvents() {
         btn.addEventListener('click', () => {
             openConfirmModal({
                 title: 'Delete Project',
-                message: `Delete "${btn.dataset.delProjName}" and its tasks/bugs/builds?`,
+                message: `Delete "${btn.dataset.delProjName}" and all linked tasks, bugs, builds, and assets?`,
                 confirmLabel: 'Delete',
                 danger: true,
                 onConfirm: () => deleteProject(btn.dataset.delProj, btn.dataset.delProjName),
@@ -317,9 +295,7 @@ function renderBoardView() {
             ${db.profiles.map((m) => `<option value="${m.id}" ${filters.boardAssignee === m.id ? 'selected' : ''}>${escapeHtml(m.display_name)}</option>`).join('')}
           </select>
         </div>
-        <button type="button" onclick="openTaskModal()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs">
-          + Add Task
-        </button>
+        <button type="button" onclick="openTaskModal()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs">+ Add Task</button>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -336,6 +312,7 @@ function renderBoardView() {
                 .map((t) => {
                     const proj = getProjectById(t.project_id);
                     const assignee = getProfileById(t.assignee_id);
+                    const commentCount = db.comments.filter((c) => c.entity_type === 'task' && c.entity_id === t.id).length;
                     return `
                       <div draggable="true" data-task-id="${t.id}" onclick="openTaskModal('${t.id}')"
                         class="p-3 rounded-lg bg-[#09090b] border border-[#27272a] hover:border-zinc-600 cursor-pointer transition">
@@ -345,7 +322,7 @@ function renderBoardView() {
                         </div>
                         <div class="text-xs font-medium text-zinc-100 leading-snug">${escapeHtml(t.title)}</div>
                         <div class="flex items-center justify-between mt-2.5 text-[11px] text-zinc-500">
-                          <span class="truncate">${escapeHtml(proj?.name || 'General')}</span>
+                          <span class="truncate">${escapeHtml(proj?.name || 'General')}${commentCount ? ` · 💬 ${commentCount}` : ''}</span>
                           <span class="font-mono text-zinc-400 shrink-0">${escapeHtml(assignee?.display_name || 'Unassigned')}</span>
                         </div>
                       </div>`;
@@ -360,28 +337,13 @@ function renderBoardView() {
 }
 
 function bindBoardEvents() {
-    document.getElementById('board-search')?.addEventListener('input', (e) => {
-        filters.boardSearch = e.target.value;
-        renderCurrentView();
-    });
-    document.getElementById('board-proj')?.addEventListener('change', (e) => {
-        filters.boardProject = e.target.value;
-        renderCurrentView();
-    });
-    document.getElementById('board-disc')?.addEventListener('change', (e) => {
-        filters.boardDiscipline = e.target.value;
-        renderCurrentView();
-    });
-    document.getElementById('board-user')?.addEventListener('change', (e) => {
-        filters.boardAssignee = e.target.value;
-        renderCurrentView();
-    });
+    document.getElementById('board-search')?.addEventListener('input', (e) => { filters.boardSearch = e.target.value; renderCurrentView(); });
+    document.getElementById('board-proj')?.addEventListener('change', (e) => { filters.boardProject = e.target.value; renderCurrentView(); });
+    document.getElementById('board-disc')?.addEventListener('change', (e) => { filters.boardDiscipline = e.target.value; renderCurrentView(); });
+    document.getElementById('board-user')?.addEventListener('change', (e) => { filters.boardAssignee = e.target.value; renderCurrentView(); });
 
     document.querySelectorAll('[data-task-id]').forEach((card) => {
-        card.addEventListener('dragstart', () => {
-            draggedTaskId = card.dataset.taskId;
-            card.classList.add('kanban-card-dragging');
-        });
+        card.addEventListener('dragstart', () => { draggedTaskId = card.dataset.taskId; card.classList.add('kanban-card-dragging'); });
         card.addEventListener('dragend', () => {
             draggedTaskId = null;
             card.classList.remove('kanban-card-dragging');
@@ -390,17 +352,12 @@ function bindBoardEvents() {
     });
 
     document.querySelectorAll('[data-drop-col]').forEach((colEl) => {
-        colEl.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            colEl.classList.add('kanban-drop-active');
-        });
+        colEl.addEventListener('dragover', (e) => { e.preventDefault(); colEl.classList.add('kanban-drop-active'); });
         colEl.addEventListener('dragleave', () => colEl.classList.remove('kanban-drop-active'));
         colEl.addEventListener('drop', async (e) => {
             e.preventDefault();
             colEl.classList.remove('kanban-drop-active');
-            if (draggedTaskId) {
-                await updateTaskStatus(draggedTaskId, colEl.dataset.dropCol);
-            }
+            if (draggedTaskId) await updateTaskStatus(draggedTaskId, colEl.dataset.dropCol);
         });
     });
 }
@@ -430,9 +387,7 @@ function renderBugsView() {
             ${BUG_STATUSES.map((st) => `<option ${filters.bugStatus === st ? 'selected' : ''}>${st}</option>`).join('')}
           </select>
         </div>
-        <button type="button" onclick="openBugModal()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs">
-          + Log Bug
-        </button>
+        <button type="button" onclick="openBugModal()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs">+ Log Bug</button>
       </div>
 
       <div class="bg-[#0f1014] border border-[#27272a] rounded-xl overflow-x-auto">
@@ -451,11 +406,14 @@ function renderBugsView() {
             ? list
                 .map((b) => {
                     const proj = getProjectById(b.project_id);
+                    const cCount = db.comments.filter((c) => c.entity_type === 'bug' && c.entity_id === b.id).length;
                     return `
                         <tr class="hover:bg-[#14151a]/70">
                           <td class="py-3 px-4">
                             <button type="button" onclick="openBugModal('${b.id}')" class="font-medium text-zinc-100 hover:text-emerald-400 text-left">
                               ${escapeHtml(b.title)}
+                              ${b.media_path ? `<span class="ml-1.5 px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 text-[10px] font-mono">Media</span>` : ''}
+                              ${cCount ? `<span class="ml-1 text-[10px] text-zinc-500">💬 ${cCount}</span>` : ''}
                             </button>
                           </td>
                           <td class="py-3 px-4 text-zinc-400">${escapeHtml(proj?.name || 'General')}</td>
@@ -479,22 +437,11 @@ function renderBugsView() {
 }
 
 function bindBugsEvents() {
-    document.getElementById('bug-search')?.addEventListener('input', (e) => {
-        filters.bugSearch = e.target.value;
-        renderCurrentView();
-    });
-    document.getElementById('bug-sev')?.addEventListener('change', (e) => {
-        filters.bugSeverity = e.target.value;
-        renderCurrentView();
-    });
-    document.getElementById('bug-status')?.addEventListener('change', (e) => {
-        filters.bugStatus = e.target.value;
-        renderCurrentView();
-    });
+    document.getElementById('bug-search')?.addEventListener('input', (e) => { filters.bugSearch = e.target.value; renderCurrentView(); });
+    document.getElementById('bug-sev')?.addEventListener('change', (e) => { filters.bugSeverity = e.target.value; renderCurrentView(); });
+    document.getElementById('bug-status')?.addEventListener('change', (e) => { filters.bugStatus = e.target.value; renderCurrentView(); });
     document.querySelectorAll('[data-bug-status-id]').forEach((sel) => {
-        sel.addEventListener('change', async (e) => {
-            await updateBugStatus(e.target.dataset.bugStatusId, e.target.value);
-        });
+        sel.addEventListener('change', async (e) => { await updateBugStatus(e.target.dataset.bugStatusId, e.target.value); });
     });
 }
 
@@ -522,54 +469,149 @@ function renderBuildsDocsView() {
 
       ${isBuilds
             ? db.builds.length
-                ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                ${db.builds
+                ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${db.builds
                     .map((b) => {
                         const proj = getProjectById(b.project_id);
                         return `
-                      <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-4 space-y-2.5">
-                        <div class="flex items-center justify-between gap-2">
-                          <div>
-                            <span class="text-sm font-mono font-semibold text-emerald-400">${escapeHtml(b.version)}</span>
-                            <span class="text-xs text-zinc-400 ml-2">${escapeHtml(proj?.name || 'General')} · ${escapeHtml(b.platform)}</span>
-                          </div>
-                          <div class="flex items-center gap-1.5">
-                            <button type="button" onclick="copyBuildUrl('${b.id}')" class="px-2 py-1 rounded bg-[#14151a] border border-[#27272a] text-[11px] text-zinc-300">Copy Link</button>
-                            <button type="button" onclick="deleteBuildById('${b.id}')" class="px-2 py-1 rounded bg-[#14151a] border border-[#27272a] text-[11px] text-red-400">Delete</button>
-                          </div>
+                    <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-4 space-y-2.5">
+                      <div class="flex items-center justify-between gap-2">
+                        <div>
+                          <span class="text-sm font-mono font-semibold text-emerald-400">${escapeHtml(b.version)}</span>
+                          <span class="text-xs text-zinc-400 ml-2">${escapeHtml(proj?.name || 'General')} · ${escapeHtml(b.platform)}</span>
                         </div>
-                        ${b.changelog ? `<p class="text-xs text-zinc-400 leading-relaxed">${escapeHtml(b.changelog)}</p>` : ''}
-                        <a href="${escapeHtml(safeUrl(b.download_url))}" target="_blank" rel="noopener noreferrer" class="inline-block text-xs text-emerald-400 hover:underline">Download Build ↗</a>
-                      </div>`;
+                        <div class="flex items-center gap-1.5">
+                          <button type="button" onclick="copyBuildUrl('${b.id}')" class="px-2 py-1 rounded bg-[#14151a] border border-[#27272a] text-[11px] text-zinc-300">Copy Link</button>
+                          <button type="button" onclick="deleteBuildById('${b.id}')" class="px-2 py-1 rounded bg-[#14151a] border border-[#27272a] text-[11px] text-red-400">Delete</button>
+                        </div>
+                      </div>
+                      ${b.changelog ? `<p class="text-xs text-zinc-400 leading-relaxed">${escapeHtml(b.changelog)}</p>` : ''}
+                      <a href="${escapeHtml(safeUrl(b.download_url))}" target="_blank" rel="noopener noreferrer" class="inline-block text-xs text-emerald-400 hover:underline">Download Build ↗</a>
+                    </div>`;
                     })
-                    .join('')}
-              </div>`
+                    .join('')}</div>`
                 : `<div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-8 text-center text-xs text-zinc-500">No builds logged yet.</div>`
             : db.docs.length
-                ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              ${db.docs
+                ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${db.docs
                     .map((d) => {
                         const proj = getProjectById(d.project_id);
                         return `
-                    <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-4 space-y-2">
-                      <div class="flex items-center justify-between gap-2">
-                        <span class="text-xs font-mono text-emerald-400">${escapeHtml(d.category)} · ${escapeHtml(proj?.name || 'Studio')}</span>
-                        <button type="button" onclick="deleteDocById('${d.id}')" class="text-[11px] text-red-400 hover:underline">Delete</button>
-                      </div>
-                      <div class="text-sm font-semibold text-zinc-100">${escapeHtml(d.title)}</div>
-                      ${d.notes ? `<p class="text-xs text-zinc-400">${escapeHtml(d.notes)}</p>` : ''}
-                      <a href="${escapeHtml(safeUrl(d.url))}" target="_blank" rel="noopener noreferrer" class="inline-block text-xs text-emerald-400 hover:underline">Open Resource ↗</a>
-                    </div>`;
+                  <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-4 space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="text-xs font-mono text-emerald-400">${escapeHtml(d.category)} · ${escapeHtml(proj?.name || 'Studio')}</span>
+                      <button type="button" onclick="deleteDocById('${d.id}')" class="text-[11px] text-red-400 hover:underline">Delete</button>
+                    </div>
+                    <div class="text-sm font-semibold text-zinc-100">${escapeHtml(d.title)}</div>
+                    ${d.notes ? `<p class="text-xs text-zinc-400">${escapeHtml(d.notes)}</p>` : ''}
+                    <a href="${escapeHtml(safeUrl(d.url))}" target="_blank" rel="noopener noreferrer" class="inline-block text-xs text-emerald-400 hover:underline">Open Resource ↗</a>
+                  </div>`;
                     })
-                    .join('')}
-            </div>`
+                    .join('')}</div>`
                 : `<div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-8 text-center text-xs text-zinc-500">No docs or links added yet.</div>`
         }
     </div>
   `;
 }
 
-// 6. TEAM & ACCESS
+// 6. ASSETS PIPELINE + STORAGE METER
+function renderAssetsView() {
+    const used = Number(db.storage?.used_bytes) || 0;
+    const max = Number(db.storage?.max_bytes) || MAX_STORAGE_BYTES;
+    const pct = Math.min(100, Math.round((used / max) * 1000) / 10);
+    const barColor = pct >= 90 ? 'bg-red-500' : pct >= 75 ? 'bg-amber-400' : 'bg-emerald-500';
+
+    const list = db.assets.filter((a) => {
+        if (filters.assetProject !== 'All' && a.project_id !== filters.assetProject) return false;
+        if (filters.assetType !== 'All' && a.asset_type !== filters.assetType) return false;
+        if (filters.assetStatus !== 'All' && a.status !== filters.assetStatus) return false;
+        if (filters.assetSearch && !a.name.toLowerCase().includes(filters.assetSearch.toLowerCase())) return false;
+        return true;
+    });
+
+    return `
+    <div class="space-y-4 animate-in">
+      <!-- Storage Quota Card -->
+      <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="space-y-1 flex-1">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-zinc-100">Supabase Studio Storage (${db.storage.file_count} files)</span>
+            <span class="font-mono text-emerald-400">${formatBytes(used)} / ${formatBytes(max)} (${pct}%)</span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-zinc-900 overflow-hidden">
+            <div class="h-full ${barColor} rounded-full transition-all" style="width:${pct}%"></div>
+          </div>
+          <p class="text-[11px] text-zinc-500">Max single upload: 50 MB. For larger asset packs or full game builds, paste an external link.</p>
+        </div>
+        <button type="button" onclick="openAssetModal()" class="px-3.5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs shrink-0">
+          + Upload / Add Asset
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex flex-wrap items-center gap-2 bg-[#0f1014] border border-[#27272a] rounded-xl p-3">
+        <input id="asset-search" type="text" value="${escapeHtml(filters.assetSearch)}" placeholder="Search assets..."
+          class="bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-1.5 text-xs text-zinc-100 outline-none" />
+        <select id="asset-proj" class="bg-[#09090b] border border-[#27272a] rounded-lg px-2.5 py-1.5 text-xs text-zinc-200">
+          <option value="All">All Projects</option>
+          ${db.projects.map((p) => `<option value="${p.id}" ${filters.assetProject === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
+        </select>
+        <select id="asset-type" class="bg-[#09090b] border border-[#27272a] rounded-lg px-2.5 py-1.5 text-xs text-zinc-200">
+          <option value="All">All Types</option>
+          ${ASSET_TYPES.map((t) => `<option ${filters.assetType === t ? 'selected' : ''}>${t}</option>`).join('')}
+        </select>
+        <select id="asset-status" class="bg-[#09090b] border border-[#27272a] rounded-lg px-2.5 py-1.5 text-xs text-zinc-200">
+          <option value="All">All Stages</option>
+          ${ASSET_STATUSES.map((s) => `<option ${filters.assetStatus === s ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+      </div>
+
+      <!-- Asset Cards -->
+      ${list.length
+            ? `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">${list
+                .map((a) => {
+                    const proj = getProjectById(a.project_id);
+                    const uploader = getProfileById(a.uploader_id);
+                    return `
+                  <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-4 flex flex-col justify-between gap-3">
+                    <div>
+                      <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                          <div class="text-xs font-mono text-emerald-400">${escapeHtml(a.asset_type)} · ${escapeHtml(proj?.name || 'General')}</div>
+                          <div class="text-sm font-semibold text-zinc-100 truncate mt-0.5">${escapeHtml(a.name)}</div>
+                        </div>
+                        <select data-asset-status-id="${a.id}" class="bg-[#09090b] border border-[#27272a] rounded px-2 py-1 text-[11px] text-zinc-200">
+                          ${ASSET_STATUSES.map((st) => `<option ${a.status === st ? 'selected' : ''}>${st}</option>`).join('')}
+                        </select>
+                      </div>
+                      ${a.notes ? `<p class="text-xs text-zinc-400 mt-2 leading-relaxed">${escapeHtml(a.notes)}</p>` : ''}
+                    </div>
+                    <div class="pt-3 border-t border-[#27272a] flex items-center justify-between gap-2 text-[11px]">
+                      <span class="font-mono text-zinc-500 truncate">${a.file_path ? formatBytes(a.file_size) : a.external_url ? 'External Link' : 'Metadata only'} · ${escapeHtml(uploader?.display_name || '')}</span>
+                      <div class="flex items-center gap-1.5 shrink-0">
+                        ${a.file_path || a.external_url ? `<button type="button" onclick="downloadAssetById('${a.id}')" class="px-2 py-1 rounded bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25">Open</button>` : ''}
+                        <button type="button" onclick="openAssetModal('${a.id}')" class="px-2 py-1 rounded bg-[#14151a] border border-[#27272a] text-zinc-300">Edit</button>
+                        <button type="button" onclick="deleteAssetById('${a.id}')" class="px-2 py-1 rounded bg-[#14151a] border border-[#27272a] text-red-400">Delete</button>
+                      </div>
+                    </div>
+                  </div>`;
+                })
+                .join('')}</div>`
+            : `<div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-8 text-center text-xs text-zinc-500">No assets uploaded or tracked yet.</div>`
+        }
+    </div>
+  `;
+}
+
+function bindAssetsEvents() {
+    document.getElementById('asset-search')?.addEventListener('input', (e) => { filters.assetSearch = e.target.value; renderCurrentView(); });
+    document.getElementById('asset-proj')?.addEventListener('change', (e) => { filters.assetProject = e.target.value; renderCurrentView(); });
+    document.getElementById('asset-type')?.addEventListener('change', (e) => { filters.assetType = e.target.value; renderCurrentView(); });
+    document.getElementById('asset-status')?.addEventListener('change', (e) => { filters.assetStatus = e.target.value; renderCurrentView(); });
+    document.querySelectorAll('[data-asset-status-id]').forEach((sel) => {
+        sel.addEventListener('change', async (e) => { await updateAssetStatus(e.target.dataset.assetStatusId, e.target.value); });
+    });
+}
+
+// 7. TEAM & ACCESS (WITH IN-APP ADMIN WHITELIST)
 function renderTeamView() {
     return `
     <div class="space-y-5 animate-in">
@@ -577,7 +619,7 @@ function renderTeamView() {
         <div class="flex items-center justify-between mb-4">
           <div>
             <h3 class="text-sm font-semibold text-zinc-100">Reptile Studio Roster (${db.profiles.length})</h3>
-            <p class="text-xs text-zinc-500 mt-0.5">Add new team emails in Supabase Auth + <code class="font-mono text-zinc-400">allowed_emails</code>.</p>
+            <p class="text-xs text-zinc-500 mt-0.5">Active members with portal access.</p>
           </div>
           <button type="button" onclick="openEditProfileModal(currentProfile.id)" class="px-3 py-1.5 rounded-lg bg-[#14151a] border border-[#27272a] text-xs text-zinc-200 hover:bg-zinc-800">
             Edit My Profile
@@ -594,7 +636,7 @@ function renderTeamView() {
                     ${escapeHtml(getInitials(m.display_name))}
                   </div>
                   <div class="min-w-0">
-                    <div class="text-sm font-medium text-zinc-100 truncate">${escapeHtml(m.display_name)}</div>
+                    <div class="text-sm font-medium text-zinc-100 truncate">${escapeHtml(m.display_name)} <span class="text-[10px] font-mono text-emerald-400">${escapeHtml(m.access_role)}</span></div>
                     <div class="text-xs text-zinc-500 truncate">${escapeHtml(m.studio_title)} · @${escapeHtml(m.username)}</div>
                   </div>
                 </div>
@@ -604,6 +646,58 @@ function renderTeamView() {
             .join('')}
         </div>
       </div>
+
+      ${isAdmin()
+            ? `<div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-5 space-y-4">
+              <div>
+                <h3 class="text-sm font-semibold text-zinc-100">Allowed Emails Whitelist (Admin Only)</h3>
+                <p class="text-xs text-zinc-500 mt-0.5">Only Google/Discord emails listed here can sign in for the first time.</p>
+              </div>
+              <form id="whitelist-add-form" class="flex gap-2">
+                <input id="whitelist-email-input" type="email" required placeholder="teammate@gmail.com"
+                  class="flex-1 bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-zinc-100 outline-none" />
+                <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs">
+                  Add Email
+                </button>
+              </form>
+              <div class="divide-y divide-[#27272a] border border-[#27272a] rounded-lg overflow-hidden">
+                ${db.allowed_emails
+                .map(
+                    (row) => `
+                    <div class="px-3.5 py-2.5 bg-[#09090b] flex items-center justify-between text-xs">
+                      <span class="font-mono text-zinc-200">${escapeHtml(row.email)}</span>
+                      <button type="button" data-remove-wl="${escapeHtml(row.email)}" class="text-red-400 hover:underline text-[11px]">Remove</button>
+                    </div>`
+                )
+                .join('')}
+              </div>
+            </div>`
+            : ''
+        }
     </div>
   `;
+}
+
+function bindTeamEvents() {
+    document.getElementById('whitelist-add-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const input = document.getElementById('whitelist-email-input');
+        const val = input.value.trim();
+        if (!val) return;
+        input.value = '';
+        await addWhitelistEmail(val);
+    });
+
+    document.querySelectorAll('[data-remove-wl]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const email = btn.dataset.removeWl;
+            openConfirmModal({
+                title: 'Remove Whitelisted Email',
+                message: `Remove ${email} from allowed_emails?`,
+                confirmLabel: 'Remove',
+                danger: true,
+                onConfirm: () => removeWhitelistEmail(email),
+            });
+        });
+    });
 }
