@@ -43,24 +43,26 @@ function updateLoginConfigUI() {
     if (cfg.source === 'hardcoded') {
         card?.classList.add('hidden');
         changeFooter?.classList.add('hidden');
-        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shrink-0';
-        text.textContent = 'Connected to Reptile Studio Cloud';
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shrink-0';
+        if (text) text.textContent = 'Connected to Reptile Studio Cloud';
     } else if (cfg.source === 'localStorage') {
         card?.classList.add('hidden');
         changeFooter?.classList.remove('hidden');
         closeBtn?.classList.remove('hidden');
         clearBtn?.classList.remove('hidden');
-        document.getElementById('cfg-sb-url').value = cfg.url;
-        document.getElementById('cfg-sb-key').value = cfg.key;
-        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shrink-0';
-        text.textContent = `Connected: ${cfg.url.replace(/^https?:\/\//, '')}`;
+        const urlInput = document.getElementById('cfg-sb-url');
+        const keyInput = document.getElementById('cfg-sb-key');
+        if (urlInput) urlInput.value = cfg.url;
+        if (keyInput) keyInput.value = cfg.key;
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shrink-0';
+        if (text) text.textContent = `Connected: ${cfg.url.replace(/^https?:\/\//, '')}`;
     } else {
         card?.classList.remove('hidden');
         changeFooter?.classList.add('hidden');
         closeBtn?.classList.add('hidden');
         clearBtn?.classList.add('hidden');
-        dot.className = 'w-2 h-2 rounded-full bg-amber-400 shrink-0';
-        text.textContent = 'Enter Supabase credentials above to connect';
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-amber-400 shrink-0';
+        if (text) text.textContent = 'Enter Supabase credentials above to connect';
     }
     refreshIcons();
 }
@@ -77,7 +79,7 @@ function clearLocalSupabaseConfig() {
     localStorage.removeItem(LS_KEY_KEY);
     sb = null;
     updateLoginConfigUI();
-    setLoginAlert('Saved Supabase keys cleared.', 'info');
+    setLoginAlert('Saved Supabase keys cleared.', 'error');
 }
 
 function toggleForgotMode(showForgot) {
@@ -94,7 +96,10 @@ async function signInWithOAuthProvider(provider) {
     }
     setLoginAlert('');
     const redirectTo = window.location.origin + window.location.pathname;
-    const { error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo } });
+    const { error } = await sb.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo },
+    });
     if (error) setLoginAlert(error.message, 'error');
 }
 
@@ -103,8 +108,19 @@ function checkOAuthRedirectErrors() {
     const hashStr = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
     const hashParams = new URLSearchParams(hashStr);
 
-    const errDesc = searchParams.get('error_description') || hashParams.get('error_description') || searchParams.get('error') || hashParams.get('error');
-    if (!errDesc) return;
+    // Clean leftover query parameters from accidental form reload without touching OAuth PKCE code
+    if (searchParams.has('studio_title') || searchParams.has('display_name')) {
+        window.history.replaceState(null, '', window.location.pathname);
+        return false;
+    }
+
+    const errDesc =
+        searchParams.get('error_description') ||
+        hashParams.get('error_description') ||
+        searchParams.get('error') ||
+        hashParams.get('error');
+
+    if (!errDesc) return false;
 
     const decoded = decodeURIComponent(errDesc.replace(/\+/g, ' '));
     const isWhitelistBlock = /whitelisted|database error saving new user|access denied/i.test(decoded);
@@ -118,71 +134,95 @@ function checkOAuthRedirectErrors() {
             : `Sign-in failed: ${decoded}`,
         'error'
     );
+    return true;
 }
 
 async function handleSessionChange(session) {
-    currentSession = session || null;
+    if (sessionCheckInFlight) return;
+    sessionCheckInFlight = true;
 
-    if (!currentSession) {
-        activeUserId = null;
-        currentProfile = null;
-        if (realtimeChannel && sb) {
-            sb.removeChannel(realtimeChannel);
-            realtimeChannel = null;
+    try {
+        currentSession = session || null;
+
+        if (!currentSession) {
+            activeUserId = null;
+            currentProfile = null;
+            if (realtimeChannel && sb) {
+                sb.removeChannel(realtimeChannel);
+                realtimeChannel = null;
+            }
+            showScreen('login-view');
+            updateLoginConfigUI();
+            return;
         }
+
+        if (activeUserId === currentSession.user.id && currentProfile) {
+            showScreen('app-shell');
+            return;
+        }
+
+        const { data: profile, error } = await sb
+            .from('profiles')
+            .select('*')
+            .eq('id', currentSession.user.id)
+            .maybeSingle();
+
+        if (error) {
+            console.error('[Reptile Studio] Profile lookup error:', error);
+            showScreen('login-view');
+            updateLoginConfigUI();
+            setLoginAlert(`Could not load profile: ${error.message}`, 'error');
+            return;
+        }
+
+        if (!profile) {
+            activeUserId = currentSession.user.id;
+            currentProfile = null;
+            const meta = currentSession.user.user_metadata || {};
+            const emailPrefix = (currentSession.user.email || '').split('@')[0];
+            const handle = String(meta.preferred_username || meta.user_name || emailPrefix || '')
+                .toLowerCase()
+                .replace(/[^a-z0-9_.-]/g, '');
+            const displayName =
+                meta.full_name ||
+                meta.name ||
+                meta.custom_claims?.global_name ||
+                (handle ? handle.charAt(0).toUpperCase() + handle.slice(1) : '');
+
+            const uidEl = document.getElementById('setup-user-uid');
+            const emailEl = document.getElementById('setup-user-email');
+            if (uidEl) uidEl.textContent = currentSession.user.id;
+            if (emailEl) emailEl.textContent = currentSession.user.email || '';
+
+            const form = document.getElementById('profile-setup-form');
+            if (form) {
+                if (!form.username.value) form.username.value = handle;
+                if (!form.display_name.value) form.display_name.value = displayName;
+            }
+
+            showScreen('profile-setup-view');
+            return;
+        }
+
+        activeUserId = currentSession.user.id;
+        currentProfile = profile;
+        const avatarEl = document.getElementById('topbar-avatar');
+        const nameEl = document.getElementById('topbar-user-name');
+        if (avatarEl) avatarEl.textContent = getInitials(profile.display_name);
+        if (nameEl) nameEl.textContent = profile.display_name;
+
+        showScreen('app-shell');
+        await fetchAllData(false);
+        subscribeRealtime();
+        navigateTo(currentView || 'overview');
+    } catch (err) {
+        console.error('[Reptile Studio] Session error:', err);
         showScreen('login-view');
         updateLoginConfigUI();
-        return;
+        setLoginAlert(`Session error: ${err.message || err}`, 'error');
+    } finally {
+        sessionCheckInFlight = false;
     }
-
-    if (activeUserId === currentSession.user.id && currentProfile) {
-        return;
-    }
-    activeUserId = currentSession.user.id;
-
-    const { data: profile, error } = await sb
-        .from('profiles')
-        .select('*')
-        .eq('id', currentSession.user.id)
-        .maybeSingle();
-
-    if (error) {
-        console.error('Profile lookup error:', error);
-        showScreen('login-view');
-        updateLoginConfigUI();
-        setLoginAlert(`Could not load profile: ${error.message}`, 'error');
-        return;
-    }
-
-    if (!profile) {
-        const meta = currentSession.user.user_metadata || {};
-        const emailPrefix = (currentSession.user.email || '').split('@')[0];
-        const handle = String(meta.preferred_username || meta.user_name || emailPrefix || '')
-            .toLowerCase()
-            .replace(/[^a-z0-9_.-]/g, '');
-        const displayName =
-            meta.full_name ||
-            meta.name ||
-            meta.custom_claims?.global_name ||
-            (handle ? handle.charAt(0).toUpperCase() + handle.slice(1) : '');
-
-        document.getElementById('setup-user-uid').textContent = currentSession.user.id;
-        document.getElementById('setup-user-email').textContent = currentSession.user.email || '';
-        const form = document.getElementById('profile-setup-form');
-        form.username.value = handle;
-        form.display_name.value = displayName;
-        showScreen('profile-setup-view');
-        return;
-    }
-
-    currentProfile = profile;
-    document.getElementById('topbar-avatar').textContent = getInitials(profile.display_name);
-    document.getElementById('topbar-user-name').textContent = profile.display_name;
-
-    showScreen('app-shell');
-    await fetchAllData(false);
-    subscribeRealtime();
-    navigateTo(currentView || 'overview');
 }
 
 async function bindAuthAndCheckSession() {
@@ -190,11 +230,15 @@ async function bindAuthAndCheckSession() {
         authSubscription.subscription.unsubscribe();
     }
 
+    // IMPORTANT: Never call sb.from(...) synchronously inside onAuthStateChange (causes GoTrue lock deadlock)
     const { data: subData } = sb.auth.onAuthStateChange((event, session) => {
+        if (event === 'INITIAL_SESSION') return;
         if (event === 'PASSWORD_RECOVERY') {
-            showToast('Recovery session active — update your profile or password.', 'info');
+            showToast('Recovery session active — update your password or profile.', 'info');
         }
-        handleSessionChange(session);
+        setTimeout(() => {
+            handleSessionChange(session);
+        }, 0);
     });
     authSubscription = subData;
 
@@ -204,6 +248,10 @@ async function bindAuthAndCheckSession() {
 }
 
 async function handleSignOut() {
+    if (realtimeChannel && sb) {
+        sb.removeChannel(realtimeChannel);
+        realtimeChannel = null;
+    }
     if (sb) await sb.auth.signOut();
     currentSession = null;
     currentProfile = null;

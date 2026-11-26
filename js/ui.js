@@ -94,10 +94,12 @@ function openConfirmModal({ title, message, confirmLabel = 'Confirm', danger = f
     });
 }
 
-function copyText(text, msg = 'Copied') {
-    navigator.clipboard?.writeText(text).then(
-        () => showToast(msg, 'success'),
-        () => showToast('Could not copy', 'error')
+function copyBuildUrl(buildId) {
+    const b = db.builds.find((x) => x.id === buildId);
+    if (!b) return;
+    navigator.clipboard?.writeText(b.download_url).then(
+        () => showToast('Build link copied', 'success'),
+        () => showToast('Could not copy link', 'error')
     );
 }
 
@@ -165,7 +167,7 @@ function renderCommandResults(query) {
     });
 }
 
-// --- Modals: Project, Task, Bug, Build, Doc, Profile ---
+// --- Modals ---
 function openProjectModal(projectId = null) {
     const p = projectId ? getProjectById(projectId) : null;
     const milestonesText = Array.isArray(p?.milestones)

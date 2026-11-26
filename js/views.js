@@ -77,7 +77,6 @@ function renderOverviewView() {
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <!-- Projects Progress -->
         <div class="lg:col-span-2 space-y-5">
           <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-5">
             <div class="flex items-center justify-between mb-4">
@@ -109,7 +108,6 @@ function renderOverviewView() {
         }
           </div>
 
-          <!-- My Assigned Tasks -->
           <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-5">
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-sm font-semibold text-zinc-100">My Tasks (${escapeHtml(currentProfile.display_name)})</h3>
@@ -139,7 +137,6 @@ function renderOverviewView() {
           </div>
         </div>
 
-        <!-- Live Activity Feed -->
         <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-5">
           <h3 class="text-sm font-semibold text-zinc-100 mb-3">Studio Activity</h3>
           ${db.activity_logs.length
@@ -537,8 +534,8 @@ function renderBuildsDocsView() {
                             <span class="text-xs text-zinc-400 ml-2">${escapeHtml(proj?.name || 'General')} · ${escapeHtml(b.platform)}</span>
                           </div>
                           <div class="flex items-center gap-1.5">
-                            <button type="button" onclick="copyText('${escapeHtml(b.download_url)}', 'Build link copied')" class="px-2 py-1 rounded bg-[#14151a] border border-[#27272a] text-[11px] text-zinc-300">Copy Link</button>
-                            <button type="button" onclick="deleteBuild('${b.id}', '${escapeHtml(b.version)}')" class="px-2 py-1 rounded bg-[#14151a] border border-[#27272a] text-[11px] text-red-400">Delete</button>
+                            <button type="button" onclick="copyBuildUrl('${b.id}')" class="px-2 py-1 rounded bg-[#14151a] border border-[#27272a] text-[11px] text-zinc-300">Copy Link</button>
+                            <button type="button" onclick="deleteBuildById('${b.id}')" class="px-2 py-1 rounded bg-[#14151a] border border-[#27272a] text-[11px] text-red-400">Delete</button>
                           </div>
                         </div>
                         ${b.changelog ? `<p class="text-xs text-zinc-400 leading-relaxed">${escapeHtml(b.changelog)}</p>` : ''}
@@ -557,7 +554,7 @@ function renderBuildsDocsView() {
                     <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-4 space-y-2">
                       <div class="flex items-center justify-between gap-2">
                         <span class="text-xs font-mono text-emerald-400">${escapeHtml(d.category)} · ${escapeHtml(proj?.name || 'Studio')}</span>
-                        <button type="button" onclick="deleteDoc('${d.id}', '${escapeHtml(d.title)}')" class="text-[11px] text-red-400 hover:underline">Delete</button>
+                        <button type="button" onclick="deleteDocById('${d.id}')" class="text-[11px] text-red-400 hover:underline">Delete</button>
                       </div>
                       <div class="text-sm font-semibold text-zinc-100">${escapeHtml(d.title)}</div>
                       ${d.notes ? `<p class="text-xs text-zinc-400">${escapeHtml(d.notes)}</p>` : ''}

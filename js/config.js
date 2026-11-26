@@ -1,4 +1,4 @@
-// Replace these two values with your Supabase Project URL and Publishable/Anon Key
+// Hardcoded Supabase Project Credentials (safe for public frontend with RLS + whitelist)
 const SUPABASE_URL = 'https://fprpvayqstsnawbmputz.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_sXGycE_FBouIbcK-OhTwXA_Y0Vwin10';
 
@@ -12,6 +12,7 @@ let realtimeDebounce = null;
 let currentSession = null;
 let currentProfile = null;
 let activeUserId = null;
+let sessionCheckInFlight = false;
 let currentView = 'overview';
 let draggedTaskId = null;
 
@@ -51,13 +52,13 @@ const BUILD_PLATFORMS = ['Windows', 'Android', 'WebGL', 'Linux', 'macOS'];
 const DOC_CATEGORIES = ['GDD', 'GitHub Repo', 'Art / 3D Assets', 'Audio', 'Design Ref', 'Other'];
 
 function isHardcodedConfig() {
+    const url = (SUPABASE_URL || '').trim();
+    const key = (SUPABASE_PUBLISHABLE_KEY || '').trim();
     return (
-        SUPABASE_URL &&
-        SUPABASE_URL.trim() !== '' &&
-        SUPABASE_URL !== 'https://fprpvayqstsnawbmputz.supabase.co' &&
-        SUPABASE_PUBLISHABLE_KEY &&
-        SUPABASE_PUBLISHABLE_KEY.trim() !== '' &&
-        SUPABASE_PUBLISHABLE_KEY !== 'sb_publishable_sXGycE_FBouIbcK-OhTwXA_Y0Vwin10'
+        url.startsWith('https://') &&
+        !url.includes('YOUR_SUPABASE_URL') &&
+        key.length > 15 &&
+        !key.includes('YOUR_SUPABASE_PUBLISHABLE_KEY')
     );
 }
 
@@ -80,7 +81,7 @@ function initSupabaseClient() {
         return false;
     }
     if (!window.supabase || typeof window.supabase.createClient !== 'function') {
-        throw new Error('Supabase SDK failed to load from CDN.');
+        throw new Error('Supabase CDN script did not load.');
     }
     sb = window.supabase.createClient(cfg.url, cfg.key, {
         auth: {
@@ -119,7 +120,9 @@ function safeUrl(url) {
 function getInitials(name) {
     if (!name) return 'RS';
     const parts = name.trim().split(/\s+/);
-    return parts.length === 1 ? parts[0].slice(0, 2).toUpperCase() : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    return parts.length === 1
+        ? parts[0].slice(0, 2).toUpperCase()
+        : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 function getProfileById(id) {

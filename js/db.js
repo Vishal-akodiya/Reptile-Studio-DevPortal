@@ -230,10 +230,12 @@ async function saveBuild(payload) {
     await fetchAllData(false);
 }
 
-async function deleteBuild(id, version) {
+async function deleteBuildById(id) {
+    const b = db.builds.find((x) => x.id === id);
+    if (!b) return;
     const { error } = await sb.from('builds').delete().eq('id', id);
     if (error) return showToast(`Delete failed: ${error.message}`, 'error');
-    await logActivity('removed build', version);
+    await logActivity('removed build', b.version);
     showToast('Build removed', 'success');
     await fetchAllData(false);
 }
@@ -246,10 +248,12 @@ async function saveDoc(payload) {
     await fetchAllData(false);
 }
 
-async function deleteDoc(id, title) {
+async function deleteDocById(id) {
+    const d = db.docs.find((x) => x.id === id);
+    if (!d) return;
     const { error } = await sb.from('docs').delete().eq('id', id);
     if (error) return showToast(`Delete failed: ${error.message}`, 'error');
-    await logActivity('removed doc', title);
+    await logActivity('removed doc', d.title);
     showToast('Doc removed', 'success');
     await fetchAllData(false);
 }
