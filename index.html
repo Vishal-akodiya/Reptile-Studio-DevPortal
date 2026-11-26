@@ -6,14 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reptile Studio — Live Studio Portal</title>
 
-  <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
     rel="stylesheet" />
 
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -24,119 +22,36 @@
             sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
             mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
           },
-          colors: {
-            obsidian: {
-              950: '#09090b',
-              900: '#0f1014',
-              850: '#14151a',
-              800: '#18181b',
-            },
-          },
         },
       },
     };
   </script>
 
-  <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
-
-  <!-- Supabase JS v2 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    /* Minimal custom styling for scrollbars, subtle grid, and Kanban drag feedback */
-    * {
-      scrollbar-width: thin;
-      scrollbar-color: #27272a #09090b;
-    }
-
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #09090b;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #27272a;
-      border-radius: 9999px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #3f3f46;
-    }
-
-    .portal-grid {
-      background-image:
-        linear-gradient(to right, rgba(39, 39, 42, 0.28) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(39, 39, 42, 0.28) 1px, transparent 1px);
-      background-size: 40px 40px;
-    }
-
-    .kanban-card-dragging {
-      opacity: 0.45;
-      transform: scale(0.98);
-    }
-
-    .kanban-drop-active {
-      border-color: rgba(16, 185, 129, 0.6) !important;
-      background-color: rgba(16, 185, 129, 0.06) !important;
-    }
-
-    @keyframes fadeSlideUp {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .animate-in {
-      animation: fadeSlideUp 0.16s ease-out forwards;
-    }
-  </style>
+  <link rel="stylesheet" href="css/portal.css" />
 </head>
 
 <body
   class="bg-[#09090b] text-zinc-100 font-sans antialiased selection:bg-emerald-500/30 selection:text-emerald-200 overflow-x-hidden">
 
-  <!-- ==================== 0. INITIAL BOOT LOADER ==================== -->
+  <!-- 0. BOOT VIEW (Always exits even if an error occurs) -->
   <div id="boot-view" class="min-h-screen w-full flex flex-col items-center justify-center bg-[#09090b] p-6">
     <div class="w-11 h-11 rounded-xl bg-[#0f1014] border border-[#27272a] flex items-center justify-center mb-4">
-      <svg class="w-6 h-6" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
-        aria-label="Reptile Studio Emblem">
-        <path d="M16 2.5L28 9.25V22.75L16 29.5L4 22.75V9.25L16 2.5Z" stroke="#3f3f46" stroke-width="1.5"
-          fill="#14151a" />
-        <path
-          d="M8.5 16C10.8 12.1 13.4 10.5 16 10.5C18.6 10.5 21.2 12.1 23.5 16C21.2 19.9 18.6 21.5 16 21.5C13.4 21.5 10.8 19.9 8.5 16Z"
-          stroke="#10b981" stroke-width="1.7" stroke-linejoin="round" />
-        <path d="M16 12.2L17.3 16L16 19.8L14.7 16L16 12.2Z" fill="#34d399" />
-      </svg>
+      <div class="w-5 h-5 border-2 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin"></div>
     </div>
-    <p class="text-xs font-mono text-zinc-500 tracking-wider uppercase">Initializing Reptile Studio Portal...</p>
+    <p id="boot-status" class="text-xs font-mono text-zinc-400 tracking-wider uppercase">Initializing Reptile Studio
+      Portal...</p>
   </div>
 
-  <!-- ==================== 1. AUTHENTICATION & SUPABASE SETUP VIEW ==================== -->
+  <!-- 1. LOGIN & SUPABASE CONFIG VIEW -->
   <div id="login-view"
     class="hidden min-h-screen w-full relative flex items-center justify-center p-4 sm:p-6 bg-[#09090b]">
     <div class="absolute inset-0 portal-grid pointer-events-none opacity-60"></div>
-    <div
-      class="absolute inset-0 bg-gradient-to-b from-emerald-500/[0.05] via-transparent to-[#09090b] pointer-events-none">
-    </div>
-
     <div class="relative z-10 w-full max-w-[430px] space-y-4 animate-in">
-      <!-- Brand Header -->
       <div class="flex flex-col items-center text-center mb-2">
-        <div
-          class="w-12 h-12 rounded-xl bg-[#0f1014] border border-[#27272a] flex items-center justify-center mb-3.5 shadow-lg shadow-black/40">
-          <svg class="w-7 h-7" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
-            aria-label="Reptile Studio Emblem">
+        <div class="w-12 h-12 rounded-xl bg-[#0f1014] border border-[#27272a] flex items-center justify-center mb-3">
+          <svg class="w-7 h-7" viewBox="0 0 32 32" fill="none">
             <path d="M16 2.5L28 9.25V22.75L16 29.5L4 22.75V9.25L16 2.5Z" stroke="#3f3f46" stroke-width="1.5"
               fill="#14151a" />
             <path
@@ -149,233 +64,146 @@
         <p class="text-[11px] font-mono uppercase tracking-[0.16em] text-zinc-500 mt-1">Internal Game Dev Portal</p>
       </div>
 
-      <!-- Optional Supabase Project Connection Card (Shown only when not hardcoded in file) -->
-      <div id="supabase-config-card"
-        class="hidden bg-[#0f1014] border border-emerald-500/30 rounded-xl p-5 shadow-2xl shadow-black/50">
-        <div class="flex items-start justify-between gap-3 mb-3">
-          <div class="flex items-center gap-2">
-            <div
-              class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
-              <i data-lucide="database" class="w-3.5 h-3.5"></i>
-            </div>
-            <div>
-              <h2 class="text-xs font-semibold text-zinc-100">Connect Your Supabase Project</h2>
-              <p class="text-[11px] text-zinc-500">Test live in browser before hardcoding for deploy</p>
-            </div>
-          </div>
+      <!-- Supabase Connection Box (Hidden once SUPABASE_URL & SUPABASE_PUBLISHABLE_KEY are hardcoded) -->
+      <div id="supabase-config-card" class="hidden bg-[#0f1014] border border-emerald-500/30 rounded-xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold text-zinc-100">Connect Supabase Project</span>
           <button type="button" id="close-config-btn" onclick="toggleConfigPanel(false)"
-            class="hidden p-1 text-zinc-500 hover:text-zinc-300 rounded">
+            class="hidden text-zinc-500 hover:text-zinc-300">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
-
-        <form id="supabase-config-form" class="space-y-3" autocomplete="off">
+        <form id="supabase-config-form" class="space-y-3">
           <div>
-            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Project URL</label>
+            <label class="block text-[11px] text-zinc-400 mb-1">Project URL</label>
             <input id="cfg-sb-url" type="url" required placeholder="https://xxxx.supabase.co"
-              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 placeholder-zinc-600 outline-none transition" />
+              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 outline-none" />
           </div>
           <div>
-            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Publishable Key (or legacy anon key)</label>
+            <label class="block text-[11px] text-zinc-400 mb-1">Publishable / Anon Key</label>
             <input id="cfg-sb-key" type="text" required placeholder="sb_publishable_... or eyJ..."
-              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 placeholder-zinc-600 outline-none transition" />
+              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 outline-none" />
           </div>
-          <div class="flex items-center justify-between gap-2 pt-1">
+          <div class="flex items-center justify-between pt-1">
             <button type="button" id="clear-config-btn" onclick="clearLocalSupabaseConfig()"
-              class="hidden text-[11px] text-zinc-500 hover:text-red-400 transition">
+              class="hidden text-[11px] text-zinc-500 hover:text-red-400">
               Reset saved keys
             </button>
             <button type="submit"
-              class="ml-auto px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs inline-flex items-center gap-1.5 transition">
-              <i data-lucide="plug" class="w-3.5 h-3.5"></i>
+              class="ml-auto px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs">
               Save &amp; Connect
             </button>
           </div>
         </form>
       </div>
 
-      <!-- Main Studio Login Card -->
-      <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-6 shadow-2xl shadow-black/60">
-        <!-- Connection Status Strip -->
-        <div id="login-conn-pill"
+      <div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-6 shadow-2xl">
+        <div
           class="mb-4 px-3 py-2 rounded-lg bg-[#14151a] border border-[#27272a] flex items-center justify-between gap-2">
           <div class="flex items-center gap-2 min-w-0">
             <span id="login-conn-dot" class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
-            <span id="login-conn-text" class="text-[11px] font-mono text-zinc-400 truncate">Supabase not
-              configured</span>
+            <span id="login-conn-text" class="text-[11px] font-mono text-zinc-400 truncate">Checking
+              connection...</span>
           </div>
-          <span class="text-[10px] font-mono text-zinc-600 shrink-0">LIVE AUTH</span>
+          <span class="text-[10px] font-mono text-zinc-600">AUTH</span>
         </div>
 
-        <!-- Inline Error / Success Notice -->
-        <div id="login-alert" class="hidden mb-4 px-3.5 py-2.5 rounded-lg text-xs flex items-start gap-2"></div>
+        <div id="login-alert" class="hidden mb-4 px-3.5 py-2.5 rounded-lg text-xs"></div>
 
-        <!-- OAuth Providers (Google & Discord) -->
+        <!-- Google & Discord OAuth -->
         <div id="oauth-section" class="space-y-2.5 mb-4">
           <button id="oauth-google-btn" type="button" onclick="signInWithOAuthProvider('google')"
-            class="w-full bg-[#14151a] hover:bg-zinc-800/90 active:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed border border-[#27272a] hover:border-zinc-700 text-zinc-100 font-medium text-xs sm:text-sm py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2.5">
-            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-              <path fill="#4285F4"
-                d="M23.49 12.275c0-.85-.075-1.675-.215-2.475H12v4.685h6.445c-.28 1.495-1.125 2.765-2.395 3.615v3.005h3.875c2.265-2.085 3.565-5.16 3.565-8.83z" />
-              <path fill="#34A853"
-                d="M12 24c3.24 0 5.955-1.075 7.94-2.91l-3.875-3.005c-1.075.72-2.45 1.15-4.065 1.15-3.125 0-5.77-2.11-6.715-4.945H1.28v3.1C3.255 21.31 7.31 24 12 24z" />
-              <path fill="#FBBC05"
-                d="M5.285 14.29c-.24-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29v-3.1H1.28C.465 8.235 0 10.065 0 12s.465 3.765 1.28 5.39l4.005-3.1z" />
-              <path fill="#EA4335"
-                d="M12 4.765c1.76 0 3.34.605 4.585 1.795l3.435-3.435C17.95 1.19 15.235 0 12 0 7.31 0 3.255 2.69 1.28 6.61l4.005 3.1c.945-2.835 3.59-4.945 6.715-4.945z" />
-            </svg>
+            class="w-full bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-zinc-100 font-medium text-xs sm:text-sm py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2.5">
             <span>Continue with Google</span>
           </button>
 
           <button id="oauth-discord-btn" type="button" onclick="signInWithOAuthProvider('discord')"
-            class="w-full bg-[#5865F2] hover:bg-[#4752C4] active:bg-[#3C45A5] disabled:opacity-50 disabled:cursor-not-allowed border border-[#5865F2] text-white font-medium text-xs sm:text-sm py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2.5 shadow-sm shadow-[#5865F2]/20">
-            <svg class="w-4 h-4 shrink-0 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
-            </svg>
+            class="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium text-xs sm:text-sm py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2.5">
             <span>Continue with Discord</span>
           </button>
 
           <div class="relative py-1.5 flex items-center">
             <div class="flex-grow border-t border-[#27272a]"></div>
-            <span class="shrink mx-3 text-[10px] font-mono uppercase tracking-wider text-zinc-500">or continue with
-              studio email</span>
+            <span class="shrink mx-3 text-[10px] font-mono uppercase tracking-wider text-zinc-500">or email</span>
             <div class="flex-grow border-t border-[#27272a]"></div>
           </div>
         </div>
 
-        <!-- Standard Sign In Form -->
+        <!-- Email + Password Form -->
         <form id="login-form" class="space-y-4">
           <div>
-            <label for="login-email" class="block text-xs font-medium text-zinc-400 mb-1.5">Studio Email (Gmail)</label>
+            <label for="login-email" class="block text-xs font-medium text-zinc-400 mb-1.5">Email</label>
             <input id="login-email" type="email" required autocomplete="email" placeholder="name@gmail.com"
-              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/25 rounded-lg px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none transition" />
+              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2.5 text-sm text-zinc-100 outline-none" />
           </div>
-
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <label for="login-password" class="block text-xs font-medium text-zinc-400">Password</label>
               <button type="button" onclick="toggleForgotMode(true)"
-                class="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium transition">
+                class="text-[11px] text-emerald-400 hover:text-emerald-300">
                 Forgot password?
               </button>
             </div>
-            <div class="relative">
-              <input id="login-password" type="password" required autocomplete="current-password"
-                placeholder="Enter your password"
-                class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/25 rounded-lg pl-3 pr-10 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none transition" />
-              <button type="button" id="toggle-password-btn"
-                class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-300 transition rounded"
-                aria-label="Toggle password visibility">
-                <i data-lucide="eye" class="w-4 h-4"></i>
-              </button>
-            </div>
+            <input id="login-password" type="password" required autocomplete="current-password" placeholder="••••••••"
+              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2.5 text-sm text-zinc-100 outline-none" />
           </div>
-
           <button id="login-submit-btn" type="submit"
-            class="w-full bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-semibold text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2">
-            <span>Sign In to Portal</span>
-            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            class="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold text-sm py-2.5 rounded-lg transition">
+            Sign In to Portal
           </button>
         </form>
 
-        <!-- Forgot Password Reset Form (Hidden by default) -->
+        <!-- Password Reset Form -->
         <form id="forgot-form" class="hidden space-y-4">
-          <div class="text-xs text-zinc-400 leading-relaxed">
-            Enter your invited studio Gmail address. Supabase will send you a secure password recovery link that opens
-            directly back into this portal.
-          </div>
-          <div>
-            <label for="forgot-email" class="block text-xs font-medium text-zinc-400 mb-1.5">Studio Email
-              (Gmail)</label>
-            <input id="forgot-email" type="email" required placeholder="name@gmail.com"
-              class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none transition" />
-          </div>
-          <div class="flex items-center gap-2">
+          <p class="text-xs text-zinc-400">Enter your studio email to receive a password reset link.</p>
+          <input id="forgot-email" type="email" required placeholder="name@gmail.com"
+            class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2.5 text-sm text-zinc-100 outline-none" />
+          <div class="flex gap-2">
             <button type="button" onclick="toggleForgotMode(false)"
-              class="px-3.5 py-2.5 rounded-lg bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-xs font-medium text-zinc-300 transition">
+              class="px-3.5 py-2 rounded-lg bg-[#14151a] border border-[#27272a] text-xs text-zinc-300">
               Back
             </button>
             <button id="forgot-submit-btn" type="submit"
-              class="flex-1 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold text-xs py-2.5 rounded-lg transition flex items-center justify-center gap-1.5">
-              <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+              class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs py-2 rounded-lg">
               Send Recovery Email
             </button>
           </div>
         </form>
 
-        <!-- Subtle Toggle for LocalStorage Connection (Hidden when hardcoded) -->
-        <div id="change-conn-footer" class="hidden mt-5 pt-4 border-t border-[#27272a] text-center">
+        <div id="change-conn-footer" class="hidden mt-4 pt-3 border-t border-[#27272a] text-center">
           <button type="button" onclick="toggleConfigPanel(true)"
-            class="text-[11px] font-mono text-zinc-500 hover:text-emerald-400 transition inline-flex items-center gap-1.5">
-            <i data-lucide="settings-2" class="w-3 h-3"></i>
+            class="text-[11px] font-mono text-zinc-500 hover:text-emerald-400">
             Change Supabase Connection
           </button>
         </div>
       </div>
-
-      <p class="text-center text-[11px] text-zinc-600">
-        Private workspace for invited Reptile Studio members only.
-      </p>
     </div>
   </div>
 
-  <!-- ==================== 2. NON-BLOCKING PROFILE ONBOARDING VIEW ==================== -->
-  <div id="profile-setup-view"
-    class="hidden min-h-screen w-full relative flex items-center justify-center p-4 sm:p-6 bg-[#09090b]">
-    <div class="absolute inset-0 portal-grid pointer-events-none opacity-50"></div>
-    <div
-      class="relative z-10 w-full max-w-md bg-[#0f1014] border border-[#27272a] rounded-xl p-6 shadow-2xl shadow-black/60 animate-in">
-      <div class="flex items-center gap-3 mb-4">
-        <div
-          class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 shrink-0">
-          <i data-lucide="user-check" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <h2 class="text-base font-semibold text-zinc-100">Complete Your Studio Profile</h2>
-          <p class="text-xs text-zinc-400">Your auth login succeeded, but no <code
-              class="font-mono text-emerald-400">public.profiles</code> row exists yet.</p>
-        </div>
+  <!-- 2. PROFILE SETUP VIEW -->
+  <div id="profile-setup-view" class="hidden min-h-screen w-full flex items-center justify-center p-4 bg-[#09090b]">
+    <div class="w-full max-w-md bg-[#0f1014] border border-[#27272a] rounded-xl p-6">
+      <h2 class="text-base font-semibold text-zinc-100 mb-1">Complete Studio Profile</h2>
+      <p class="text-xs text-zinc-400 mb-4">Create your <code class="font-mono text-emerald-400">public.profiles</code>
+        entry to continue.</p>
+      <div class="mb-4 p-3 rounded-lg bg-[#09090b] border border-[#27272a] text-xs font-mono">
+        <div id="setup-user-uid" class="text-zinc-300 break-all"></div>
+        <div id="setup-user-email" class="text-zinc-500 mt-1"></div>
       </div>
-
-      <!-- Exact Auth User UID box -->
-      <div class="mb-4 p-3 rounded-lg bg-[#09090b] border border-[#27272a]">
-        <div class="flex items-center justify-between gap-2 mb-1">
-          <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Your Auth User UID</span>
-          <button type="button" onclick="copyTextToClipboard(currentSession?.user?.id || '', 'User UID copied')"
-            class="text-[10px] font-mono text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1">
-            <i data-lucide="copy" class="w-3 h-3"></i> Copy UID
-          </button>
-        </div>
-        <div id="setup-user-uid" class="text-xs font-mono text-zinc-300 break-all"></div>
-        <div id="setup-user-email" class="text-[11px] text-zinc-500 mt-1"></div>
-      </div>
-
-      <form id="profile-setup-form" class="space-y-3.5">
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1">Display Name *</label>
-          <input name="display_name" required placeholder="e.g., Vishal"
-            class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none" />
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1">Short Handle (Username) *</label>
-          <input name="username" required placeholder="e.g., vishal"
-            class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-sm font-mono text-zinc-100 outline-none" />
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1">Studio Title / Discipline *</label>
-          <input name="studio_title" required placeholder="e.g., Lead Dev & Shaders"
-            class="w-full bg-[#09090b] border border-[#27272a] focus:border-emerald-500/70 rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none" />
-        </div>
-
-        <div class="flex items-center justify-between gap-2 pt-2">
+      <form id="profile-setup-form" class="space-y-3">
+        <input name="display_name" required placeholder="Display Name (e.g., Vishal)"
+          class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none" />
+        <input name="username" required placeholder="Handle (e.g., vishal)"
+          class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-sm font-mono text-zinc-100 outline-none" />
+        <input name="studio_title" required placeholder="Role / Discipline (e.g., Lead Dev)"
+          class="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none" />
+        <div class="flex gap-2 pt-2">
           <button type="button" onclick="handleSignOut()"
-            class="px-3.5 py-2.5 rounded-lg bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] text-xs font-medium text-zinc-400 hover:text-zinc-200 transition">
+            class="px-3.5 py-2 rounded-lg bg-[#14151a] border border-[#27272a] text-xs text-zinc-400">
             Sign Out
           </button>
           <button id="setup-profile-btn" type="submit"
-            class="flex-1 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold text-xs py-2.5 px-4 rounded-lg transition inline-flex items-center justify-center gap-1.5">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs py-2 rounded-lg">
             Create My Profile Now
           </button>
         </div>
@@ -383,811 +211,125 @@
     </div>
   </div>
 
-  <!-- ==================== 3. MAIN DASHBOARD SHELL ==================== -->
+  <!-- 3. MAIN DASHBOARD SHELL -->
   <div id="app-shell" class="hidden min-h-screen w-full flex bg-[#09090b]">
-
-    <!-- Mobile Sidebar Backdrop -->
-    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-30 hidden lg:hidden"
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/75 z-30 hidden lg:hidden"
       onclick="toggleMobileSidebar(false)"></div>
 
-    <!-- Left Navigation Sidebar -->
     <aside id="sidebar"
-      class="fixed lg:sticky top-0 left-0 z-40 h-screen w-60 shrink-0 bg-[#0f1014] border-r border-[#27272a] flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out">
-      <!-- Brand Header -->
+      class="fixed lg:sticky top-0 left-0 z-40 h-screen w-60 shrink-0 bg-[#0f1014] border-r border-[#27272a] flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform">
       <div class="h-14 px-4 border-b border-[#27272a] flex items-center justify-between">
-        <button type="button" onclick="navigateTo('overview')" class="flex items-center gap-2.5 text-left group">
-          <div
-            class="w-7 h-7 rounded-lg bg-[#14151a] border border-[#27272a] flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 2.5L28 9.25V22.75L16 29.5L4 22.75V9.25L16 2.5Z" stroke="#3f3f46" stroke-width="1.8"
-                fill="#09090b" />
-              <path
-                d="M8.5 16C10.8 12.1 13.4 10.5 16 10.5C18.6 10.5 21.2 12.1 23.5 16C21.2 19.9 18.6 21.5 16 21.5C13.4 21.5 10.8 19.9 8.5 16Z"
-                stroke="#10b981" stroke-width="2" stroke-linejoin="round" />
-              <path d="M16 12.2L17.4 16L16 19.8L14.6 16L16 12.2Z" fill="#34d399" />
-            </svg>
-          </div>
-          <div>
-            <div
-              class="text-sm font-semibold tracking-tight text-zinc-100 leading-none group-hover:text-emerald-400 transition">
-              Reptile Studio</div>
-            <div class="text-[10px] font-mono text-zinc-500 mt-1 leading-none">STUDIO PORTAL</div>
-          </div>
+        <button type="button" onclick="navigateTo('overview')" class="flex items-center gap-2 text-left">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+          <span class="text-sm font-semibold text-zinc-100">Reptile Studio</span>
         </button>
-        <button type="button" onclick="toggleMobileSidebar(false)"
-          class="lg:hidden p-1.5 text-zinc-400 hover:text-zinc-200 rounded-md">
+        <button type="button" onclick="toggleMobileSidebar(false)" class="lg:hidden p-1 text-zinc-400">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <!-- Primary Navigation -->
-      <nav class="flex-1 px-2.5 py-4 space-y-1 overflow-y-auto" aria-label="Primary Navigation">
-        <div class="px-2.5 pb-1.5 text-[10px] font-mono uppercase tracking-wider text-zinc-500">Workspace</div>
+      <nav class="flex-1 px-2.5 py-4 space-y-1 overflow-y-auto">
         <button data-nav="overview" onclick="navigateTo('overview')"
-          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
-          <span class="flex items-center gap-2.5">
-            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-            Overview
-          </span>
+          class="nav-item w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Overview
         </button>
         <button data-nav="projects" onclick="navigateTo('projects')"
-          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
-          <span class="flex items-center gap-2.5">
-            <i data-lucide="folder-kanban" class="w-4 h-4"></i>
-            Projects
-          </span>
+          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium">
+          <span class="flex items-center gap-2.5"><i data-lucide="folder-kanban" class="w-4 h-4"></i> Projects</span>
           <span id="nav-count-projects" class="text-[11px] font-mono text-zinc-500">0</span>
         </button>
         <button data-nav="board" onclick="navigateTo('board')"
-          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
-          <span class="flex items-center gap-2.5">
-            <i data-lucide="columns-3" class="w-4 h-4"></i>
-            Task Board
-          </span>
+          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium">
+          <span class="flex items-center gap-2.5"><i data-lucide="columns-3" class="w-4 h-4"></i> Task Board</span>
           <span id="nav-count-tasks" class="text-[11px] font-mono text-zinc-500">0</span>
         </button>
         <button data-nav="bugs" onclick="navigateTo('bugs')"
-          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
-          <span class="flex items-center gap-2.5">
-            <i data-lucide="bug" class="w-4 h-4"></i>
-            Bug Tracker
-          </span>
+          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium">
+          <span class="flex items-center gap-2.5"><i data-lucide="bug" class="w-4 h-4"></i> Bug Tracker</span>
           <span id="nav-count-bugs" class="text-[11px] font-mono text-zinc-500">0</span>
         </button>
-
-        <div class="px-2.5 pt-5 pb-1.5 text-[10px] font-mono uppercase tracking-wider text-zinc-500">Studio Vault</div>
         <button data-nav="builds" onclick="navigateTo('builds')"
-          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
-          <span class="flex items-center gap-2.5">
-            <i data-lucide="package" class="w-4 h-4"></i>
-            Builds &amp; Docs
-          </span>
+          class="nav-item w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium">
+          <i data-lucide="package" class="w-4 h-4"></i> Builds &amp; Docs
         </button>
         <button data-nav="team" onclick="navigateTo('team')"
-          class="nav-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm font-medium transition">
-          <span class="flex items-center gap-2.5">
-            <i data-lucide="users" class="w-4 h-4"></i>
-            Team &amp; Access
-          </span>
+          class="nav-item w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium">
+          <i data-lucide="users" class="w-4 h-4"></i> Team &amp; Access
         </button>
       </nav>
 
-      <!-- Live Realtime Sync Badge Footer -->
-      <div class="p-3 border-t border-[#27272a]">
-        <div
-          class="px-2.5 py-2 rounded-lg bg-[#09090b] border border-[#27272a] flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="relative flex h-2 w-2 shrink-0">
-              <span id="rt-ping"
-                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span id="rt-dot" class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span id="rt-label" class="text-xs font-medium text-emerald-400 truncate">Live Sync</span>
-          </div>
-          <button type="button" onclick="fetchAllData(true)" title="Force refresh from Supabase"
-            class="p-1 text-zinc-500 hover:text-zinc-200 rounded transition">
-            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
-          </button>
-        </div>
+      <div class="p-3 border-t border-[#27272a] flex items-center justify-between text-xs">
+        <span id="rt-label" class="text-emerald-400 font-medium">Live Sync</span>
+        <button type="button" onclick="fetchAllData(true)" class="p-1 text-zinc-500 hover:text-zinc-200"
+          title="Refresh">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+        </button>
       </div>
     </aside>
 
-    <!-- Main Content Column -->
-    <div class="flex-1 min-w-0 flex flex-col min-h-screen">
-      <!-- Top Bar -->
+    <div class="flex-1 min-w-0 flex flex-col">
       <header
-        class="sticky top-0 z-20 h-14 bg-[#09090b]/85 backdrop-blur-md border-b border-[#27272a] px-4 sm:px-6 flex items-center justify-between gap-3">
+        class="sticky top-0 z-20 h-14 bg-[#09090b]/85 backdrop-blur border-b border-[#27272a] px-4 sm:px-6 flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
-          <button type="button" onclick="toggleMobileSidebar(true)"
-            class="lg:hidden p-2 -ml-2 text-zinc-400 hover:text-zinc-100 rounded-lg hover:bg-[#14151a] transition"
-            aria-label="Open menu">
+          <button type="button" onclick="toggleMobileSidebar(true)" class="lg:hidden p-1.5 text-zinc-400">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
-          <div class="flex items-center gap-2.5 min-w-0">
-            <h2 id="topbar-title" class="text-sm sm:text-base font-semibold tracking-tight text-zinc-100 truncate">
-              Overview</h2>
-            <span id="topbar-subtitle"
-              class="hidden md:inline-block text-xs text-zinc-500 border-l border-[#27272a] pl-2.5 truncate">Studio
-              pulse &amp; active work</span>
-          </div>
+          <h2 id="topbar-title" class="text-sm sm:text-base font-semibold text-zinc-100 truncate">Overview</h2>
         </div>
 
-        <div class="flex items-center gap-2 sm:gap-3">
-          <!-- Global Ctrl+K Quick Search Trigger -->
+        <div class="flex items-center gap-2">
           <button type="button" onclick="openCommandPalette()"
-            class="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#0f1014] hover:bg-[#14151a] border border-[#27272a] text-zinc-400 hover:text-zinc-200 text-xs transition"
-            title="Quick Search (Ctrl+K)">
-            <i data-lucide="search" class="w-3.5 h-3.5 text-zinc-500"></i>
-            <span class="hidden sm:inline text-zinc-500 pr-4">Search studio...</span>
-            <kbd
-              class="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono bg-[#09090b] border border-[#27272a] rounded text-zinc-400">⌘K</kbd>
+            class="px-2.5 py-1.5 rounded-lg bg-[#0f1014] border border-[#27272a] text-xs text-zinc-400 hover:text-zinc-200">
+            ⌘K
           </button>
-
-          <!-- Quick New Task Button -->
           <button type="button" onclick="openTaskModal()"
-            class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs transition shrink-0">
-            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-            <span class="hidden sm:inline">New Task</span>
+            class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs">
+            + New Task
           </button>
-
-          <div class="h-5 w-px bg-[#27272a] hidden sm:block"></div>
-
-          <!-- Logged-in Profile Pill & Sign Out -->
-          <div class="flex items-center gap-1.5">
-            <button type="button" onclick="openEditProfileModal(currentProfile.id)" title="Edit your profile"
-              class="flex items-center gap-2 px-2 py-1 rounded-lg bg-[#0f1014] hover:bg-[#14151a] border border-[#27272a] transition text-left">
-              <div id="topbar-avatar"
-                class="w-6 h-6 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-mono font-semibold flex items-center justify-center shrink-0">
-                RS</div>
-              <div class="hidden md:block leading-tight pr-1">
-                <div id="topbar-user-name" class="text-xs font-medium text-zinc-200">Member</div>
-                <div id="topbar-user-role" class="text-[10px] font-mono text-emerald-400">Member</div>
-              </div>
-            </button>
-            <button type="button" onclick="handleSignOut()" title="Sign Out"
-              class="p-2 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition"
-              aria-label="Sign Out">
+          <div class="flex items-center gap-2 pl-2 border-l border-[#27272a]">
+            <span id="topbar-avatar"
+              class="w-7 h-7 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-mono flex items-center justify-center">RS</span>
+            <span id="topbar-user-name" class="hidden sm:inline text-xs font-medium text-zinc-200">Member</span>
+            <button type="button" onclick="handleSignOut()" class="p-1.5 text-zinc-400 hover:text-red-400"
+              title="Sign Out">
               <i data-lucide="log-out" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
       </header>
 
-      <!-- Main Dynamic View Area -->
-      <main id="main-content" class="flex-1 p-4 sm:p-6 max-w-[1440px] w-full mx-auto">
-        <!-- Rendered dynamically -->
-      </main>
+      <main id="main-content" class="flex-1 p-4 sm:p-6 max-w-[1440px] w-full mx-auto"></main>
     </div>
   </div>
 
-  <!-- ==================== 4. UNIVERSAL MODAL ROOT ==================== -->
-  <div id="modal-root"
-    class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-xs overflow-y-auto">
+  <!-- MODAL, COMMAND PALETTE & TOASTS -->
+  <div id="modal-root" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 overflow-y-auto">
     <div id="modal-panel"
-      class="relative w-full max-w-lg bg-[#0f1014] border border-[#27272a] rounded-xl shadow-2xl shadow-black/80 overflow-hidden my-auto animate-in">
+      class="relative w-full max-w-lg bg-[#0f1014] border border-[#27272a] rounded-xl shadow-2xl overflow-hidden my-auto animate-in">
     </div>
   </div>
 
-  <!-- ==================== 5. COMMAND PALETTE (CTRL+K / CMD+K) ==================== -->
-  <div id="cmd-root"
-    class="fixed inset-0 z-50 hidden items-start justify-center pt-[12vh] p-4 bg-black/75 backdrop-blur-xs">
-    <div
-      class="w-full max-w-xl bg-[#0f1014] border border-[#27272a] rounded-xl shadow-2xl shadow-black/80 overflow-hidden animate-in">
+  <div id="cmd-root" class="fixed inset-0 z-50 hidden items-start justify-center pt-[12vh] p-4 bg-black/75">
+    <div class="w-full max-w-xl bg-[#0f1014] border border-[#27272a] rounded-xl shadow-2xl overflow-hidden animate-in">
       <div class="flex items-center gap-3 px-4 py-3 border-b border-[#27272a]">
-        <i data-lucide="search" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-        <input id="cmd-input" type="text" placeholder="Search projects, tasks, bugs, builds, docs..."
-          class="w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-500 outline-none" autocomplete="off" />
-        <kbd
-          class="px-1.5 py-0.5 text-[10px] font-mono text-zinc-500 bg-[#09090b] border border-[#27272a] rounded">ESC</kbd>
+        <i data-lucide="search" class="w-4 h-4 text-emerald-400"></i>
+        <input id="cmd-input" type="text" placeholder="Search projects, tasks, bugs..."
+          class="w-full bg-transparent text-sm text-zinc-100 outline-none" />
       </div>
       <div id="cmd-results" class="max-h-[55vh] overflow-y-auto p-2 space-y-1"></div>
     </div>
   </div>
 
-  <!-- ==================== 6. TOAST CONTAINER ==================== -->
   <div id="toast-container"
     class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 w-[calc(100vw-2rem)] max-w-sm pointer-events-none"></div>
 
-  <!-- ==================== APPLICATION SCRIPT ==================== -->
-  <script>
-    /* =========================================================================
-       SUPABASE CONFIGURATION (HARDCODE BEFORE DEPLOYING TO GITHUB PAGES / VERCEL)
-       Replace the two placeholder strings below with your real Supabase Project URL
-       and Publishable Key (found in Supabase Dashboard -> Settings -> API Keys).
-       While these remain placeholders, you can enter them directly in the browser UI.
-       ========================================================================= */
-    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-    const SUPABASE_PUBLISHABLE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY';
-
-    // LocalStorage fallback keys for instant browser testing before hardcoding
-    const LS_URL_KEY = 'reptile_sb_url';
-    const LS_KEY_KEY = 'reptile_sb_key';
-
-    // -------------------- GLOBAL APPLICATION STATE --------------------
-    let sb = null;                  // Active Supabase client instance
-    let authSubscription = null;    // Auth state listener handle
-    let realtimeChannel = null;     // Supabase Realtime subscription
-    let realtimeDebounce = null;    // Debounce timer for realtime sync
-    let currentSession = null;      // Active Supabase auth session
-    let currentProfile = null;      // Logged-in user's public.profiles row
-    let activeUserId = null;        // Guard against redundant initializations
-    let currentView = 'overview';   // Active route
-    let draggedTaskId = null;       // Drag-and-drop task UUID
-    let isPasswordRecovery = false; // Tracks PASSWORD_RECOVERY auth event
-
-    // Live PostgreSQL data cache (synced via Promise.all + Realtime)
-    const db = {
-      profiles: [],
-      projects: [],
-      tasks: [],
-      bugs: [],
-      builds: [],
-      docs: [],
-      activity_logs: [],
-    };
-
-    // Persistent filter state across views
-    const filters = {
-      projectStatus: 'All',
-      projectSearch: '',
-      boardProject: 'All',
-      boardDiscipline: 'All',
-      boardAssignee: 'All',
-      boardSearch: '',
-      bugProject: 'All',
-      bugSeverity: 'All',
-      bugStatus: 'All',
-      bugSearch: '',
-      buildsTab: 'builds', // 'builds' | 'docs'
-      docsCategory: 'All',
-      myTasksShowDone: false,
-    };
-
-    // Exact database enum constants matching PostgreSQL schema
-    const PROJECT_STATUSES = ['Pre-Production', 'Prototyping', 'Vertical Slice', 'Alpha', 'Beta', 'Released'];
-    const TASK_STATUSES = ['Backlog', 'In Progress', 'In Review', 'Done'];
-    const TASK_PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
-    const TASK_DISCIPLINES = ['Code', '3D / Art', 'Audio', 'Level Design', 'UI / UX', 'QA'];
-    const BUG_SEVERITIES = ['Blocker', 'High', 'Medium', 'Low'];
-    const BUG_STATUSES = ['Open', 'In Progress', 'Fixed', 'Closed'];
-    const BUILD_PLATFORMS = ['Windows', 'Android', 'WebGL', 'Linux', 'macOS'];
-    const DOC_CATEGORIES = ['GDD', 'GitHub Repo', 'Art / 3D Assets', 'Audio', 'Design Ref', 'Other'];
-
-    // -------------------- CONFIG & SUPABASE CLIENT HELPERS --------------------
-    function isHardcodedConfig() {
-      return (
-        SUPABASE_URL &&
-        SUPABASE_URL.trim() !== '' &&
-        SUPABASE_URL !== 'YOUR_SUPABASE_URL' &&
-        SUPABASE_PUBLISHABLE_KEY &&
-        SUPABASE_PUBLISHABLE_KEY.trim() !== '' &&
-        SUPABASE_PUBLISHABLE_KEY !== 'YOUR_SUPABASE_PUBLISHABLE_KEY'
-      );
-    }
-
-    function getActiveConfig() {
-      if (isHardcodedConfig()) {
-        return { url: SUPABASE_URL.trim(), key: SUPABASE_PUBLISHABLE_KEY.trim(), source: 'hardcoded' };
-      }
-      const lsUrl = (localStorage.getItem(LS_URL_KEY) || '').trim();
-      const lsKey = (localStorage.getItem(LS_KEY_KEY) || '').trim();
-      if (lsUrl && lsKey) {
-        return { url: lsUrl, key: lsKey, source: 'localStorage' };
-      }
-      return { url: '', key: '', source: 'none' };
-    }
-
-    function initSupabaseClient() {
-      const cfg = getActiveConfig();
-      if (!cfg.url || !cfg.key) {
-        sb = null;
-        return false;
-      }
-      try {
-        if (!window.supabase || typeof window.supabase.createClient !== 'function') {
-          showToast('Supabase CDN script failed to load. Check internet connection.', 'error');
-          return false;
-        }
-        sb = window.supabase.createClient(cfg.url, cfg.key, {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true,
-          },
-        });
-        return true;
-      } catch (err) {
-        console.error('Supabase createClient error:', err);
-        showToast('Invalid Supabase URL or Key format.', 'error');
-        sb = null;
-        return false;
-      }
-    }
-
-    // -------------------- DATA SANITIZATION & FORMAT HELPERS --------------------
-    // Prevents PostgreSQL syntax errors on nullable DATE / UUID columns
-    function toNullableDate(val) {
-      if (!val || typeof val !== 'string' || val.trim() === '') return null;
-      return val.trim();
-    }
-
-    function toNullableUuid(val) {
-      if (!val || typeof val !== 'string' || val.trim() === '') return null;
-      return val.trim();
-    }
-
-    function escapeHtml(str) {
-      if (str === null || str === undefined) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    function safeUrl(url) {
-      if (!url) return '';
-      const trimmed = url.trim();
-      if (/^https?:\/\//i.test(trimmed)) return trimmed;
-      return 'https://' + trimmed;
-    }
-
-    function shortCode(uuid, prefix = 'ID') {
-      if (!uuid) return `${prefix}-0000`;
-      return `${prefix}-${String(uuid).slice(0, 4).toUpperCase()}`;
-    }
-
-    function getInitials(name) {
-      if (!name) return 'RS';
-      const parts = name.trim().split(/\s+/);
-      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    }
-
-    function getProfileById(id) {
-      return db.profiles.find((p) => p.id === id) || null;
-    }
-
-    function getProjectById(id) {
-      return db.projects.find((p) => p.id === id) || null;
-    }
-
-    function getProjectMetrics(project) {
-      const pTasks = db.tasks.filter((t) => t.project_id === project.id);
-      const tasksTotal = pTasks.length;
-      const tasksDone = pTasks.filter((t) => t.status === 'Done').length;
-      const milestones = Array.isArray(project.milestones) ? project.milestones : [];
-      const msTotal = milestones.length;
-      const msDone = milestones.filter((m) => m && m.done).length;
-
-      // Auto-calculate progress primarily from tasks; fallback to milestones if 0 tasks
-      let pct = 0;
-      if (tasksTotal > 0 && msTotal > 0) {
-        pct = Math.round(((tasksDone / tasksTotal) * 0.7 + (msDone / msTotal) * 0.3) * 100);
-      } else if (tasksTotal > 0) {
-        pct = Math.round((tasksDone / tasksTotal) * 100);
-      } else if (msTotal > 0) {
-        pct = Math.round((msDone / msTotal) * 100);
-      }
-      return { tasksTotal, tasksDone, msTotal, msDone, pct };
-    }
-
-    function formatDateShort(dateStr) {
-      if (!dateStr) return 'No date';
-      try {
-        const d = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00');
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      } catch {
-        return dateStr;
-      }
-    }
-
-    function relativeTime(isoStr) {
-      if (!isoStr) return '';
-      const ts = new Date(isoStr).getTime();
-      const diffSec = Math.max(1, Math.floor((Date.now() - ts) / 1000));
-      if (diffSec < 60) return 'just now';
-      const mins = Math.floor(diffSec / 60);
-      if (mins < 60) return `${mins}m ago`;
-      const hrs = Math.floor(mins / 60);
-      if (hrs < 24) return `${hrs}h ago`;
-      const days = Math.floor(hrs / 24);
-      if (days < 30) return `${days}d ago`;
-      return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
-
-    function copyTextToClipboard(text, successMsg = 'Copied to clipboard') {
-      try {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.position = 'fixed';
-        ta.style.left = '-9999px';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        showToast(successMsg, 'success');
-      } catch (err) {
-        console.error('Clipboard copy failed:', err);
-        showToast('Unable to copy text', 'error');
-      }
-    }
-
-    function refreshIcons() {
-      if (window.lucide) {
-        lucide.createIcons();
-      }
-    }
-
-    // -------------------- BADGE RENDERERS --------------------
-    function projectStatusBadge(status) {
-      const map = {
-        'Pre-Production': 'bg-zinc-800 text-zinc-300 border-zinc-700',
-        Prototyping: 'bg-sky-500/10 text-sky-400 border-sky-500/25',
-        'Vertical Slice': 'bg-violet-500/10 text-violet-400 border-violet-500/25',
-        Alpha: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25',
-        Beta: 'bg-amber-500/10 text-amber-400 border-amber-500/25',
-        Released: 'bg-lime-500/15 text-lime-300 border-lime-500/30',
-      };
-      const cls = map[status] || 'bg-zinc-800 text-zinc-300 border-zinc-700';
-      return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border ${cls}">${escapeHtml(status)}</span>`;
-    }
-
-    function priorityBadge(priority) {
-      const map = {
-        Critical: 'bg-red-500/15 text-red-400 border-red-500/30',
-        High: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-        Medium: 'bg-zinc-800 text-zinc-300 border-zinc-700',
-        Low: 'bg-zinc-900 text-zinc-500 border-zinc-800',
-      };
-      const dotMap = {
-        Critical: 'bg-red-400',
-        High: 'bg-amber-400',
-        Medium: 'bg-zinc-400',
-        Low: 'bg-zinc-600',
-      };
-      return `<span class="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium border ${map[priority] || map.Medium}"><span class="w-1.5 h-1.5 rounded-full ${dotMap[priority] || dotMap.Medium}"></span>${escapeHtml(priority)}</span>`;
-    }
-
-    function disciplineBadge(discipline) {
-      const map = {
-        Code: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-        '3D / Art': 'text-purple-400 bg-purple-500/10 border-purple-500/20',
-        Audio: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-        'Level Design': 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-        'UI / UX': 'text-pink-400 bg-pink-500/10 border-pink-500/20',
-        QA: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
-      };
-      return `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border ${map[discipline] || 'text-zinc-400 bg-zinc-800 border-zinc-700'}">${escapeHtml(discipline)}</span>`;
-    }
-
-    function severityBadge(severity) {
-      const map = {
-        Blocker: 'bg-red-500/15 text-red-400 border-red-500/30',
-        High: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
-        Medium: 'bg-amber-500/15 text-amber-300 border-amber-500/25',
-        Low: 'bg-zinc-800 text-zinc-400 border-zinc-700',
-      };
-      return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border ${map[severity] || map.Low}">${escapeHtml(severity)}</span>`;
-    }
-
-    // -------------------- TOAST & MODAL SYSTEMS --------------------
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toast-container');
-      const id = 'toast_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5);
-      const styleMap = {
-        success: { border: 'border-emerald-500/35', icon: 'check-circle-2', color: 'text-emerald-400' },
-        error: { border: 'border-red-500/40', icon: 'alert-circle', color: 'text-red-400' },
-        info: { border: 'border-[#27272a]', icon: 'info', color: 'text-zinc-300' },
-      };
-      const st = styleMap[type] || styleMap.info;
-
-      const el = document.createElement('div');
-      el.id = id;
-      el.className = `pointer-events-auto bg-[#0f1014] border ${st.border} rounded-lg px-3.5 py-2.5 shadow-xl shadow-black/70 flex items-start justify-between gap-3 animate-in`;
-      el.innerHTML = `
-        <div class="flex items-start gap-2.5 min-w-0">
-          <i data-lucide="${st.icon}" class="w-4 h-4 shrink-0 mt-0.5 ${st.color}"></i>
-          <span class="text-xs font-medium text-zinc-200 leading-snug break-words">${escapeHtml(message)}</span>
-        </div>
-        <button type="button" onclick="this.parentElement.remove()" class="text-zinc-500 hover:text-zinc-300 p-0.5 shrink-0">
-          <i data-lucide="x" class="w-3.5 h-3.5"></i>
-        </button>
-      `;
-      container.appendChild(el);
-      refreshIcons();
-
-      setTimeout(() => {
-        const target = document.getElementById(id);
-        if (target) {
-          target.style.opacity = '0';
-          target.style.transform = 'translateY(6px)';
-          target.style.transition = 'all 0.18s ease';
-          setTimeout(() => target.remove(), 200);
-        }
-      }, type === 'error' ? 5000 : 3200);
-    }
-
-    function handleSupabaseError(context, error) {
-      console.error(`[Reptile Studio] ${context}:`, error);
-      const msg = error?.message || error?.error_description || 'Unexpected database error';
-      showToast(`${context}: ${msg}`, 'error');
-    }
-
-    function openModal(htmlContent, maxWidthClass = 'max-w-lg') {
-      const root = document.getElementById('modal-root');
-      const panel = document.getElementById('modal-panel');
-      panel.className = `relative w-full ${maxWidthClass} bg-[#0f1014] border border-[#27272a] rounded-xl shadow-2xl shadow-black/80 overflow-hidden my-auto animate-in`;
-      panel.innerHTML = htmlContent;
-      root.classList.remove('hidden');
-      root.classList.add('flex');
-      refreshIcons();
-    }
-
-    function closeModal() {
-      const root = document.getElementById('modal-root');
-      root.classList.add('hidden');
-      root.classList.remove('flex');
-      document.getElementById('modal-panel').innerHTML = '';
-    }
-
-    function openConfirmModal({ title, message, confirmLabel = 'Delete', danger = true, onConfirm }) {
-      const btnCls = danger
-        ? 'bg-red-500/90 hover:bg-red-500 text-white'
-        : 'bg-emerald-500 hover:bg-emerald-400 text-zinc-950';
-
-      openModal(`
-        <div class="p-5">
-          <div class="flex items-start gap-3">
-            <div class="w-9 h-9 rounded-lg ${danger ? 'bg-red-500/10 border-red-500/25 text-red-400' : 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400'} border flex items-center justify-center shrink-0">
-              <i data-lucide="${danger ? 'alert-triangle' : 'help-circle'}" class="w-4 h-4"></i>
-            </div>
-            <div>
-              <h3 class="text-sm font-semibold text-zinc-100">${escapeHtml(title)}</h3>
-              <p class="text-xs text-zinc-400 mt-1.5 leading-relaxed">${escapeHtml(message)}</p>
-            </div>
-          </div>
-          <div class="flex items-center justify-end gap-2 mt-5 pt-4 border-t border-[#27272a]">
-            <button type="button" onclick="closeModal()" class="px-3.5 py-2 rounded-lg text-xs font-medium text-zinc-300 bg-[#14151a] hover:bg-zinc-800 border border-[#27272a] transition">
-              Cancel
-            </button>
-            <button type="button" id="confirm-action-btn" class="px-3.5 py-2 rounded-lg text-xs font-semibold ${btnCls} transition">
-              ${escapeHtml(confirmLabel)}
-            </button>
-          </div>
-        </div>
-      `, 'max-w-md');
-
-      document.getElementById('confirm-action-btn').addEventListener('click', async () => {
-        closeModal();
-        await onConfirm();
-      });
-    }
-
-    // Backdrop & Keyboard Shortcuts
-    document.getElementById('modal-root').addEventListener('click', (e) => {
-      if (e.target.id === 'modal-root') closeModal();
-    });
-    document.getElementById('cmd-root').addEventListener('click', (e) => {
-      if (e.target.id === 'cmd-root') closeCommandPalette();
-    });
-    document.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        if (currentSession && currentProfile) {
-          e.preventDefault();
-          openCommandPalette();
-        }
-      } else if (e.key === 'Escape') {
-        if (!document.getElementById('cmd-root').classList.contains('hidden')) {
-          closeCommandPalette();
-        } else if (!document.getElementById('modal-root').classList.contains('hidden')) {
-          closeModal();
-        }
-      }
-    });
-
-    // ==================== AUTH, CONFIG UI & PASSWORD RECOVERY ====================
-    function showScreen(screenId) {
-      ['boot-view', 'login-view', 'profile-setup-view', 'app-shell'].forEach((id) => {
-        const el = document.getElementById(id);
-        if (id === screenId) el.classList.remove('hidden');
-        else el.classList.add('hidden');
-      });
-      refreshIcons();
-    }
-
-    function setLoginAlert(message, type = 'error') {
-      const box = document.getElementById('login-alert');
-      if (!message) {
-        box.classList.add('hidden');
-        box.innerHTML = '';
-        return;
-      }
-      const cls = type === 'success'
-        ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
-        : 'bg-red-500/10 border border-red-500/30 text-red-400';
-      const icon = type === 'success' ? 'check-circle-2' : 'alert-circle';
-      box.className = `mb-4 px-3.5 py-2.5 rounded-lg text-xs flex items-start gap-2 ${cls}`;
-      box.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 shrink-0 mt-0.5"></i><span>${escapeHtml(message)}</span>`;
-      box.classList.remove('hidden');
-      refreshIcons();
-    }
-
-    function updateLoginConfigUI() {
-      const cfg = getActiveConfig();
-      const card = document.getElementById('supabase-config-card');
-      const changeFooter = document.getElementById('change-conn-footer');
-      const closeBtn = document.getElementById('close-config-btn');
-      const clearBtn = document.getElementById('clear-config-btn');
-      const dot = document.getElementById('login-conn-dot');
-      const text = document.getElementById('login-conn-text');
-      const submitBtn = document.getElementById('login-submit-btn');
-      const googleBtn = document.getElementById('oauth-google-btn');
-      const discordBtn = document.getElementById('oauth-discord-btn');
-
-      if (cfg.source === 'hardcoded') {
-        card.classList.add('hidden');
-        changeFooter.classList.add('hidden');
-        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shrink-0';
-        text.textContent = 'Connected to Reptile Studio Cloud';
-        submitBtn.disabled = false;
-        if (googleBtn) googleBtn.disabled = false;
-        if (discordBtn) discordBtn.disabled = false;
-      } else if (cfg.source === 'localStorage') {
-        card.classList.add('hidden');
-        changeFooter.classList.remove('hidden');
-        closeBtn.classList.remove('hidden');
-        clearBtn.classList.remove('hidden');
-        document.getElementById('cfg-sb-url').value = cfg.url;
-        document.getElementById('cfg-sb-key').value = cfg.key;
-        let host = cfg.url;
-        try { host = new URL(cfg.url).host; } catch { }
-        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shrink-0';
-        text.textContent = `Connected: ${host}`;
-        submitBtn.disabled = false;
-        if (googleBtn) googleBtn.disabled = false;
-        if (discordBtn) discordBtn.disabled = false;
-      } else {
-        card.classList.remove('hidden');
-        changeFooter.classList.add('hidden');
-        closeBtn.classList.add('hidden');
-        clearBtn.classList.add('hidden');
-        dot.className = 'w-2 h-2 rounded-full bg-amber-400 shrink-0';
-        text.textContent = 'Enter Supabase credentials above to connect';
-        submitBtn.disabled = true;
-        if (googleBtn) googleBtn.disabled = true;
-        if (discordBtn) discordBtn.disabled = true;
-      }
-      refreshIcons();
-    }
-    // ... existing code ... -->
-    function toggleForgotMode(showForgot) {
-      setLoginAlert('');
-      const loginForm = document.getElementById('login-form');
-      const forgotForm = document.getElementById('forgot-form');
-      const oauthSection = document.getElementById('oauth-section');
-      if (showForgot) {
-        const existingEmail = document.getElementById('login-email').value.trim();
-        if (existingEmail) document.getElementById('forgot-email').value = existingEmail;
-        loginForm.classList.add('hidden');
-        if (oauthSection) oauthSection.classList.add('hidden');
-        forgotForm.classList.remove('hidden');
-        document.getElementById('forgot-email').focus();
-      } else {
-        forgotForm.classList.add('hidden');
-        if (oauthSection) oauthSection.classList.remove('hidden');
-        loginForm.classList.remove('hidden');
-      }
-    }
-
-    // 1-Click OAuth Sign-In (Google & Discord)
-    async function signInWithOAuthProvider(provider) {
-      if (!sb) {
-        setLoginAlert('Please connect your Supabase project first.', 'error');
-        return;
-      }
-      setLoginAlert('');
-      const googleBtn = document.getElementById('oauth-google-btn');
-      const discordBtn = document.getElementById('oauth-discord-btn');
-      const activeBtn = provider === 'google' ? googleBtn : discordBtn;
-      const originalHtml = activeBtn ? activeBtn.innerHTML : '';
-
-      if (googleBtn) googleBtn.disabled = true;
-      if (discordBtn) discordBtn.disabled = true;
-      if (activeBtn) {
-        activeBtn.innerHTML = `<span class="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin"></span><span>Redirecting to ${provider === 'google' ? 'Google' : 'Discord'}...</span>`;
-      }
-
-      try {
-        const redirectTo = window.location.origin + window.location.pathname;
-        const { error } = await sb.auth.signInWithOAuth({
-          provider,
-          options: { redirectTo },
-        });
-        if (error) {
-          throw error;
-        }
-      } catch (err) {
-        console.error(`[Reptile Studio] OAuth (${provider}) error:`, err);
-        setLoginAlert(err?.message || `Could not start ${provider} sign-in.`, 'error');
-        showToast(`${provider === 'google' ? 'Google' : 'Discord'} sign-in failed`, 'error');
-        if (googleBtn) googleBtn.disabled = false;
-        if (discordBtn) discordBtn.disabled = false;
-        if (activeBtn) activeBtn.innerHTML = originalHtml;
-      }
-    }
-
-    // Parse OAuth callback errors (e.g., blocked by enforce_email_whitelist trigger)
-    function checkOAuthRedirectErrors() {
-      const searchParams = new URLSearchParams(window.location.search);
-      const hashStr = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
-      const hashParams = new URLSearchParams(hashStr);
-
-      const errCode = searchParams.get('error') || hashParams.get('error');
-      const errDesc = searchParams.get('error_description') || hashParams.get('error_description');
-
-      if (!errCode && !errDesc) return;
-
-      const decoded = decodeURIComponent((errDesc || errCode || '').replace(/\+/g, ' '));
-      const isWhitelistBlock = /whitelisted|database error saving new user|access denied/i.test(decoded);
-      const friendlyMsg = isWhitelistBlock
-        ? 'Access denied: Your Google/Discord email is not whitelisted for Reptile Studio. Ask an Admin to add your email to allowed_emails.'
-        : `Sign-in failed: ${decoded}`;
-
-      // Clean error parameters from browser URL
-      window.history.replaceState(null, '', window.location.pathname);
-
-      showScreen('login-view');
-      updateLoginConfigUI();
-      setLoginAlert(friendlyMsg, 'error');
-      showToast(isWhitelistBlock ? 'Email not on studio whitelist' : 'OAuth sign-in error', 'error');
-    }
-
-    // Save browser-level Supabase credentials
-    // ... existing code ... -->
-    if (!profile) {
-      // Show non-blocking Profile Setup screen (pre-filled from Google/Discord metadata if available)
-      currentProfile = null;
-      const meta = session.user.user_metadata || {};
-      const emailPrefix = (session.user.email || '').split('@')[0];
-      const rawHandle = meta.preferred_username || meta.user_name || emailPrefix || '';
-      const cleanHandle = String(rawHandle).toLowerCase().replace(/[^a-z0-9_.-]/g, '');
-      const rawDisplayName =
-        meta.full_name ||
-        meta.name ||
-        meta.custom_claims?.global_name ||
-        (cleanHandle ? cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1) : '');
-
-      document.getElementById('setup-user-uid').textContent = session.user.id;
-      document.getElementById('setup-user-email').textContent = session.user.email || '';
-      const form = document.getElementById('profile-setup-form');
-      form.username.value = cleanHandle;
-      form.display_name.value = rawDisplayName;
-      showScreen('profile-setup-view');
-      return;
-    }
-
-    currentProfile = profile;
-    // ... existing code ... -->
-    // ==================== BOOTSTRAP ====================
-    (async function bootApp() {
-      try {
-        const initialized = initSupabaseClient();
-        checkOAuthRedirectErrors();
-        if (!initialized) {
-          showScreen('login-view');
-          updateLoginConfigUI();
-          return;
-        }
-        await bindAuthAndCheckSession();
-      } catch (err) {
-        console.error('Boot error:', err);
-        showScreen('login-view');
-        updateLoginConfigUI();
-      }
-    })();
-  </script>
+  <!-- Ordered scripts (no missing functions) -->
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/views.js"></script>
+  <script src="js/app.js"></script>
 </body>
 
 </html>

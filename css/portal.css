@@ -1,0 +1,37 @@
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #27272a #09090b;
+}
+
+.portal-grid {
+    background-image:
+        linear-gradient(to right, rgba(39, 39, 42, 0.28) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(39, 39, 42, 0.28) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.kanban-card-dragging {
+    opacity: 0.45;
+    transform: scale(0.98);
+}
+
+.kanban-drop-active {
+    border-color: rgba(16, 185, 129, 0.6) !important;
+    background-color: rgba(16, 185, 129, 0.06) !important;
+}
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-in {
+    animation: fadeSlideUp 0.16s ease-out forwards;
+}
