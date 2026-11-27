@@ -315,6 +315,12 @@
             class="px-2.5 py-1.5 rounded-lg bg-[#0f1014] border border-[#27272a] text-xs text-zinc-400 hover:text-zinc-200">
             ⌘K
           </button>
+          <button type="button" onclick="toggleAIAgentDrawer()"
+            class="px-2.5 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 text-emerald-300 text-xs font-medium flex items-center gap-1.5 transition"
+            title="Open Reptile Studio AI (Ctrl+J)">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Studio AI</span>
+          </button>
           <button type="button" onclick="openTaskModal()"
             class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs">
             + New Task
@@ -353,17 +359,26 @@
     </div>
   </div>
 
+  <!-- Reptile Studio AI Drawer -->
+  <div id="ai-drawer-root" onclick="if(event.target.id==='ai-drawer-root') closeAIAgentDrawer()"
+    class="fixed inset-0 z-50 hidden justify-end bg-black/60 backdrop-blur-[1px]">
+    <aside id="ai-drawer-body"
+      class="w-full max-w-md h-full bg-[#0f1014] border-l border-[#27272a] shadow-2xl flex flex-col animate-in">
+    </aside>
+  </div>
+
   <div id="toast-container"
     class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 w-[calc(100vw-2rem)] max-w-sm pointer-events-none"></div>
 
   <!-- Ordered scripts (no missing functions) -->
-  <script src="js/config.js?v=3"></script>
-  <script src="js/auth.js?v=3"></script>
-  <script src="js/db.js?v=4"></script>
-  <script src="js/viewer.js?v=5"></script>
-  <script src="js/ui.js?v=3"></script>
-  <script src="js/views.js?v=5"></script>
-  <script src="js/app.js?v=4"></script>
+  <script src="js/config.js?v=6"></script>
+  <script src="js/auth.js?v=6"></script>
+  <script src="js/db.js?v=6"></script>
+  <script src="js/viewer.js?v=6"></script>
+  <script src="js/ui.js?v=6"></script>
+  <script src="js/views.js?v=6"></script>
+  <script src="js/ai-agent.js?v=6"></script>
+  <script src="js/app.js?v=6"></script>
 </body>
 
 </html>

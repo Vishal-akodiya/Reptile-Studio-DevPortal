@@ -29,6 +29,7 @@ const db = {
     assets: [],
     asset_folders: [],
     announcements: [],
+    studio_ai_memories: [],
     comments: [],
     allowed_emails: [],
     discord_webhooks: [],

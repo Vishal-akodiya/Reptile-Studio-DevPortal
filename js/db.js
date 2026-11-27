@@ -115,6 +115,7 @@ async function fetchAllData(showFeedback = false) {
             sb.from('announcements').select('*').order('pinned', { ascending: false }).order('created_at', { ascending: false }),
             sb.from('comments').select('*').order('created_at', { ascending: true }),
             sb.from('activity_logs').select('*').order('created_at', { ascending: false }).limit(30),
+            sb.from('studio_ai_memories').select('*').order('created_at', { ascending: false }),
         ]);
 
         for (const res of results) {
@@ -132,6 +133,7 @@ async function fetchAllData(showFeedback = false) {
         db.announcements = results[8].data || [];
         db.comments = results[9].data || [];
         db.activity_logs = results[10].data || [];
+        db.studio_ai_memories = results[11].data || [];
 
         // Reset currentFolderId if the folder was deleted
         if (filters.currentFolderId && !getFolderById(filters.currentFolderId)) {
@@ -190,7 +192,7 @@ function subscribeRealtime() {
 
     const tables = [
         'profiles', 'projects', 'tasks', 'bugs', 'builds', 'docs',
-        'assets', 'asset_folders', 'announcements', 'comments', 'activity_logs',
+        'assets', 'asset_folders', 'announcements', 'comments', 'activity_logs', 'studio_ai_memories',
     ];
     realtimeChannel = sb.channel('reptile-studio-live');
 
@@ -696,5 +698,24 @@ async function removeWhitelistEmail(email) {
     if (error) return showToast(`Remove failed: ${error.message}`, 'error');
     await logActivity('removed whitelisted email', email);
     showToast(`Removed ${email}`, 'success');
+    await fetchAllData(false);
+}
+// --- AI Agent Persistent Studio Memories ---
+async function saveStudioMemory(payload) {
+    const { error } = await sb.from('studio_ai_memories').insert({
+        category: payload.category || 'Rule',
+        content: payload.content.trim(),
+        created_by: currentProfile?.id || null,
+    });
+    if (error) return showToast(`Memory save failed: ${error.message}`, 'error');
+    await logActivity('saved AI memory', payload.content.slice(0, 60));
+    showToast('Saved to Studio AI memory', 'success');
+    await fetchAllData(false);
+}
+
+async function deleteStudioMemory(id) {
+    const { error } = await sb.from('studio_ai_memories').delete().eq('id', id);
+    if (error) return showToast(`Delete failed: ${error.message}`, 'error');
+    showToast('Memory removed', 'success');
     await fetchAllData(false);
 }
