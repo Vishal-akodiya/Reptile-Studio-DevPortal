@@ -269,11 +269,9 @@ async function sendAIPrompt(customPrompt = null) {
     if (input && customPrompt === null) input.value = '';
 
     aiAgentState.messages.push({
-        id: `m_${Date.now()}`,
-        role: 'model',
-        text: data?.reply || (actions.length ? 'Review and confirm the proposed studio action below:' : 'Done.'),
-        actions,
-        meta: data?.model ? `${data.model} · ${(Number(data.latencyMs || 0) / 1000).toFixed(1)}s` : '',
+        id: `u_${Date.now()}`,
+        role: 'user',
+        text: promptText,
     });
     aiAgentState.busy = true;
     renderAIAgentDrawer();
@@ -314,6 +312,7 @@ async function sendAIPrompt(customPrompt = null) {
             role: 'model',
             text: data?.reply || (actions.length ? 'Review and confirm the proposed studio action below:' : 'Done.'),
             actions,
+            meta: data?.model ? `${data.model} · ${(Number(data.latencyMs || 0) / 1000).toFixed(1)}s` : '',
         });
     } catch (err) {
         console.error('[Reptile Studio AI] Error:', err);
