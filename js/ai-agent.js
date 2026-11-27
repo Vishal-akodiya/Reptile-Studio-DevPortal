@@ -269,9 +269,11 @@ async function sendAIPrompt(customPrompt = null) {
     if (input && customPrompt === null) input.value = '';
 
     aiAgentState.messages.push({
-        id: `u_${Date.now()}`,
-        role: 'user',
-        text: promptText,
+        id: `m_${Date.now()}`,
+        role: 'model',
+        text: data?.reply || (actions.length ? 'Review and confirm the proposed studio action below:' : 'Done.'),
+        actions,
+        meta: data?.model ? `${data.model} · ${(Number(data.latencyMs || 0) / 1000).toFixed(1)}s` : '',
     });
     aiAgentState.busy = true;
     renderAIAgentDrawer();
@@ -407,6 +409,7 @@ function renderAIAgentDrawer() {
                             ? `<div class="max-w-[92%] rounded-xl px-3.5 py-2.5 bg-[#14151a] border border-[#27272a] text-xs text-zinc-200 whitespace-pre-wrap leading-relaxed">${escapeHtml(m.text)}</div>`
                             : ''
                         }
+                    ${m.meta ? `<div class="text-[10px] font-mono text-zinc-500 pl-1">${escapeHtml(m.meta)}</div>` : ''}
                     ${m.actions?.length
                             ? `<div class="space-y-2">
                             ${m.actions
