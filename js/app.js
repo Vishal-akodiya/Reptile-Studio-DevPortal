@@ -86,6 +86,13 @@ function bindStaticUIEvents() {
             else if (!document.getElementById('modal-root')?.classList.contains('hidden')) closeModal();
         }
     });
+    // Prevent browser from navigating away when external files are dropped outside a dropzone
+    window.addEventListener('dragover', (e) => {
+        if (e.dataTransfer?.types?.includes('Files')) e.preventDefault();
+    });
+    window.addEventListener('drop', (e) => {
+        if (e.dataTransfer?.types?.includes('Files')) e.preventDefault();
+    });
 }
 
 // Attach listeners immediately, then boot with a safety fallback timer

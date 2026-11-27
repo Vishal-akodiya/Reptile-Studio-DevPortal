@@ -407,6 +407,163 @@ async function downloadAssetById(id) {
         window.open(safeUrl(asset.external_url), '_blank', 'noopener,noreferrer');
     }
 }
+// --- Multi-File Drag & Drop Batch Upload ---
+const assetUploadState = {
+    active: false,
+    total: 0,
+    completed: 0,
+    currentName: '',
+};
+
+function guessAssetType(fileName = '') {
+    const ext = String(fileName).split('.').pop().toLowerCase();
+    if (['glb', 'gltf', 'fbx', 'obj', 'blend', 'dae', 'stl', '3ds'].includes(ext)) return '3D Model';
+    if (['png', 'jpg', 'jpeg', 'webp', 'tga', 'psd', 'exr', 'hdr', 'dds', 'bmp', 'hlsl', 'shader', 'cginc', 'glsl', 'mat'].includes(ext)) return 'Texture / Shader';
+    if (['wav', 'mp3', 'ogg', 'flac', 'm4a', 'aac', 'aiff'].includes(ext)) return 'Audio / SFX';
+    if (['anim', 'controller', 'bvh'].includes(ext)) return 'Animation';
+    if (['svg', 'ico', 'ttf', 'otf', 'woff', 'woff2'].includes(ext)) return 'UI / Icon';
+    if (['cs', 'js', 'ts', 'py', 'json', 'xml', 'yaml', 'yml', 'md', 'txt', 'pdf', 'csv', 'sql', 'html', 'css'].includes(ext)) return 'Script / Doc';
+    return 'VFX / Other';
+}
+
+function renderUploadProgressBanner() {
+    if (!assetUploadState.active) return '';
+    const pct = assetUploadState.total > 0
+        ? Math.round((assetUploadState.completed / assetUploadState.total) * 100)
+        : 0;
+
+    return `
+    <div id="asset-upload-progress" class="mt-3 p-3 rounded-lg bg-[#09090b] border border-emerald-500/35 space-y-1.5">
+      <div class="flex items-center justify-between gap-2 text-xs">
+        <span class="font-medium text-emerald-300 truncate">
+          Uploading ${Math.min(assetUploadState.completed + 1, assetUploadState.total)} of ${assetUploadState.total}: ${escapeHtml(assetUploadState.currentName)}
+        </span>
+        <span class="font-mono text-emerald-400 shrink-0">${pct}%</span>
+      </div>
+      <div class="w-full h-1.5 rounded-full bg-zinc-900 overflow-hidden">
+        <div class="h-full bg-emerald-500 rounded-full transition-all" style="width:${pct}%"></div>
+      </div>
+    </div>
+  `;
+}
+
+function updateUploadProgressUI() {
+    const slot = document.getElementById('asset-upload-progress-slot');
+    if (slot) slot.innerHTML = renderUploadProgressBanner();
+}
+
+async function uploadMultipleAssets(files, targetFolderId = undefined) {
+    if (!sb || !files || !files.length) return;
+    if (assetUploadState.active) {
+        showToast('Wait for the current upload batch to finish.', 'info');
+        return;
+    }
+
+    const folderId = targetFolderId !== undefined ? targetFolderId : (filters.currentFolderId || null);
+    const targetFolder = folderId ? getFolderById(folderId) : null;
+    const projectId = targetFolder
+        ? (targetFolder.project_id || null)
+        : (filters.assetProject !== 'All' ? filters.assetProject : null);
+
+    let projectedUsed = Number(db.storage?.used_bytes) || 0;
+    const maxBytes = Number(db.storage?.max_bytes) || MAX_STORAGE_BYTES;
+
+    assetUploadState.active = true;
+    assetUploadState.total = files.length;
+    assetUploadState.completed = 0;
+    assetUploadState.currentName = files[0].name;
+    updateUploadProgressUI();
+
+    const rowsToInsert = [];
+    const uploadedPaths = [];
+    const skipped = [];
+
+    try {
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            assetUploadState.currentName = file.name;
+            updateUploadProgressUI();
+
+            if (file.size > MAX_UPLOAD_BYTES) {
+                skipped.push(`${file.name} (> 50 MB)`);
+                assetUploadState.completed++;
+                updateUploadProgressUI();
+                continue;
+            }
+
+            if (projectedUsed + file.size > maxBytes) {
+                skipped.push(`${file.name} (storage full)`);
+                assetUploadState.completed++;
+                updateUploadProgressUI();
+                continue;
+            }
+
+            const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const filePath = `assets/${Date.now()}_${i}_${cleanName}`;
+            const { error: upErr } = await sb.storage.from(STORAGE_BUCKET).upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false,
+            });
+
+            if (upErr) {
+                skipped.push(`${file.name} (${upErr.message})`);
+            } else {
+                projectedUsed += file.size;
+                uploadedPaths.push(filePath);
+                rowsToInsert.push({
+                    name: file.name,
+                    project_id: projectId,
+                    folder_id: folderId,
+                    asset_type: guessAssetType(file.name),
+                    status: 'WIP',
+                    file_path: filePath,
+                    file_name: file.name,
+                    file_size: file.size,
+                    external_url: '',
+                    notes: '',
+                    uploader_id: currentProfile?.id || null,
+                });
+            }
+
+            assetUploadState.completed++;
+            updateUploadProgressUI();
+        }
+
+        if (rowsToInsert.length > 0) {
+            const { error: dbErr } = await sb.from('assets').insert(rowsToInsert);
+            if (dbErr) {
+                // Roll back storage files if DB insert fails
+                if (uploadedPaths.length) await sb.storage.from(STORAGE_BUCKET).remove(uploadedPaths);
+                showToast(`Database save failed: ${dbErr.message}`, 'error');
+                return;
+            }
+
+            const destLabel = targetFolder ? ` into ${targetFolder.name}` : '';
+            const summary =
+                rowsToInsert.length === 1
+                    ? rowsToInsert[0].name
+                    : `${rowsToInsert.length} assets${destLabel}`;
+            await logActivity('uploaded', summary);
+        }
+
+        if (rowsToInsert.length > 0 && skipped.length === 0) {
+            showToast(
+                `Uploaded ${rowsToInsert.length} ${rowsToInsert.length === 1 ? 'asset' : 'assets'}${targetFolder ? ` to ${targetFolder.name}` : ''}`,
+                'success'
+            );
+        } else if (rowsToInsert.length > 0 && skipped.length > 0) {
+            showToast(`Uploaded ${rowsToInsert.length}, skipped ${skipped.length}: ${skipped[0]}`, 'info');
+        } else if (skipped.length > 0) {
+            showToast(`Upload skipped: ${skipped[0]}`, 'error');
+        }
+    } finally {
+        assetUploadState.active = false;
+        assetUploadState.total = 0;
+        assetUploadState.completed = 0;
+        assetUploadState.currentName = '';
+        await fetchAllData(false);
+    }
+}
 
 // --- Announcements (Admin Only) ---
 async function saveAnnouncement(payload, id = null) {

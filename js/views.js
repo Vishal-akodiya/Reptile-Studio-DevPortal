@@ -596,7 +596,30 @@ function renderBuildsDocsView() {
   `;
 }
 
-// 7. ASSETS PIPELINE (NESTED FOLDERS + INLINE PREVIEWER)
+// Helper: extract dropped files synchronously before any await (Edge/Chrome requirement)
+function extractDroppedFiles(dataTransfer) {
+  const files = [];
+  let skippedFolders = 0;
+
+  if (dataTransfer?.items && dataTransfer.items.length) {
+    for (const item of Array.from(dataTransfer.items)) {
+      if (item.kind !== 'file') continue;
+      const entry = typeof item.webkitGetAsEntry === 'function' ? item.webkitGetAsEntry() : null;
+      if (entry && entry.isDirectory) {
+        skippedFolders++;
+        continue;
+      }
+      const f = item.getAsFile();
+      if (f) files.push(f);
+    }
+  } else if (dataTransfer?.files) {
+    files.push(...Array.from(dataTransfer.files));
+  }
+
+  return { files, skippedFolders };
+}
+
+// 7. ASSETS PIPELINE (NESTED FOLDERS + MULTI-FILE DRAG & DROP + INLINE PREVIEWER)
 function renderAssetsView() {
   const used = Number(db.storage?.used_bytes) || 0;
   const max = Number(db.storage?.max_bytes) || MAX_STORAGE_BYTES;
@@ -606,8 +629,12 @@ function renderAssetsView() {
   const isSearching = Boolean(filters.assetSearch.trim() || filters.assetType !== 'All' || filters.assetStatus !== 'All');
   const breadcrumbs = getFolderBreadcrumbChain(filters.currentFolderId);
   const currentFolder = filters.currentFolderId ? getFolderById(filters.currentFolderId) : null;
+  const targetLabel = currentFolder
+    ? getFolderPathLabel(currentFolder.id)
+    : filters.assetProject !== 'All'
+      ? `${getProjectById(filters.assetProject)?.name || 'Project'} / Root`
+      : 'Studio Root';
 
-  // Subfolders inside current folder (hidden during global search)
   const visibleFolders = isSearching
     ? []
     : db.asset_folders.filter((f) => {
@@ -617,7 +644,6 @@ function renderAssetsView() {
       return true;
     });
 
-  // Assets inside current folder (or matching global search)
   const visibleAssets = db.assets.filter((a) => {
     if (filters.assetProject !== 'All' && a.project_id !== filters.assetProject) return false;
     if (filters.assetType !== 'All' && a.asset_type !== filters.assetType) return false;
@@ -639,7 +665,7 @@ function renderAssetsView() {
             <span class="font-mono text-emerald-400">${formatBytes(used)} / ${formatBytes(max)} (${pct}%)</span>
           </div>
           <div class="w-full h-2 rounded-full bg-zinc-900 overflow-hidden"><div class="h-full ${barColor} rounded-full transition-all" style="width:${pct}%"></div></div>
-          <p class="text-[11px] text-zinc-500">Preview .glb/.gltf 3D models, images, audio, PDFs &amp; scripts inline. Max upload: 50 MB.</p>
+          <p class="text-[11px] text-zinc-500">Preview .glb/.gltf 3D models, images, audio, PDFs &amp; scripts inline. Max upload: 50 MB per file.</p>
         </div>
         <div class="flex items-center gap-2 shrink-0">
           <button type="button" onclick="openFolderModal(${filters.currentFolderId ? `'${filters.currentFolderId}'` : 'null'})"
@@ -648,7 +674,7 @@ function renderAssetsView() {
           </button>
           <button type="button" onclick="openAssetModal()"
             class="px-3.5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs">
-            + Upload Asset
+            + Add Single / Link
           </button>
         </div>
       </div>
@@ -672,7 +698,6 @@ function renderAssetsView() {
           </select>
         </div>
 
-        <!-- Folder Breadcrumb Bar -->
         <div class="flex flex-wrap items-center gap-1.5 text-xs pt-2 border-t border-[#27272a]">
           ${currentFolder
       ? `<button type="button" onclick="enterFolder(${currentFolder.parent_id ? `'${currentFolder.parent_id}'` : 'null'})" class="px-2 py-1 rounded bg-[#14151a] border border-[#27272a] text-zinc-300 hover:text-white mr-1">↑ Up</button>`
@@ -694,7 +719,25 @@ function renderAssetsView() {
         </div>
       </div>
 
-      <!-- Nested Folders Grid -->
+      <!-- Multi-File Drag & Drop Upload Zone -->
+      <div id="asset-dropzone"
+        class="bg-[#0f1014] border-2 border-dashed border-[#27272a] hover:border-emerald-500/45 rounded-xl p-5 text-center transition cursor-pointer">
+        <input id="asset-multi-input" type="file" multiple class="hidden" />
+        <div class="flex flex-col items-center justify-center gap-1.5 pointer-events-none">
+          <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+          </div>
+          <div class="text-xs sm:text-sm font-medium text-zinc-200">
+            Drag &amp; drop multiple files here, or <span class="text-emerald-400 underline">browse files</span>
+          </div>
+          <div class="text-[11px] font-mono text-zinc-500">
+            Uploading to: <span class="text-zinc-300">${escapeHtml(targetLabel)}</span> · Max 50 MB each · Auto-detects 3D, Audio, Texture &amp; Script types
+          </div>
+        </div>
+        <div id="asset-upload-progress-slot">${renderUploadProgressBanner()}</div>
+      </div>
+
+      <!-- Nested Folders Grid (Each Folder Accepts Direct File Drops) -->
       ${visibleFolders.length
       ? `<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">${visibleFolders
         .map((fl) => {
@@ -702,7 +745,8 @@ function renderAssetsView() {
           const childFolderCount = db.asset_folders.filter((x) => x.parent_id === fl.id).length;
           const fileCount = db.assets.filter((x) => x.folder_id === fl.id).length;
           return `
-                  <div class="group bg-[#0f1014] hover:bg-[#14151a] border border-[#27272a] hover:border-emerald-500/40 rounded-xl p-3.5 transition flex flex-col justify-between gap-2.5">
+                  <div data-drop-folder-id="${fl.id}"
+                    class="group bg-[#0f1014] hover:bg-[#14151a] border border-[#27272a] hover:border-emerald-500/40 rounded-xl p-3.5 transition flex flex-col justify-between gap-2.5">
                     <button type="button" onclick="enterFolder('${fl.id}')" class="text-left flex items-start gap-2.5 w-full">
                       <i data-lucide="folder" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5"></i>
                       <div class="min-w-0">
@@ -710,9 +754,12 @@ function renderAssetsView() {
                         <div class="text-[11px] font-mono text-zinc-500 truncate">${escapeHtml(proj?.name || 'General')} · ${childFolderCount}d / ${fileCount}f</div>
                       </div>
                     </button>
-                    <div class="flex items-center justify-end gap-2 text-[11px] pt-1 border-t border-[#27272a]/70">
-                      <button type="button" onclick="openFolderModal(null, '${fl.id}')" class="text-zinc-400 hover:text-zinc-200">Rename</button>
-                      <button type="button" data-del-folder="${fl.id}" data-del-folder-name="${escapeHtml(fl.name)}" class="text-red-400 hover:underline">Delete</button>
+                    <div class="flex items-center justify-between gap-2 text-[11px] pt-1 border-t border-[#27272a]/70">
+                      <span class="text-[10px] font-mono text-zinc-600">Drop files here</span>
+                      <div class="flex items-center gap-2">
+                        <button type="button" onclick="openFolderModal(null, '${fl.id}')" class="text-zinc-400 hover:text-zinc-200">Rename</button>
+                        <button type="button" data-del-folder="${fl.id}" data-del-folder-name="${escapeHtml(fl.name)}" class="text-red-400 hover:underline">Delete</button>
+                      </div>
                     </div>
                   </div>`;
         })
@@ -759,7 +806,7 @@ function renderAssetsView() {
         })
         .join('')}</div>`
       : !visibleFolders.length
-        ? `<div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-8 text-center text-xs text-zinc-500">This folder is empty. Create a subfolder or upload an asset above.</div>`
+        ? `<div class="bg-[#0f1014] border border-[#27272a] rounded-xl p-8 text-center text-xs text-zinc-500">This folder is empty. Drop files above or create a subfolder.</div>`
         : ''
     }
     </div>
@@ -775,6 +822,77 @@ function bindAssetsEvents() {
   });
   document.getElementById('asset-type')?.addEventListener('change', (e) => { filters.assetType = e.target.value; renderCurrentView(); });
   document.getElementById('asset-status')?.addEventListener('change', (e) => { filters.assetStatus = e.target.value; renderCurrentView(); });
+
+  // Main multi-file dropzone + click-to-select
+  const dropzone = document.getElementById('asset-dropzone');
+  const multiInput = document.getElementById('asset-multi-input');
+
+  if (dropzone && multiInput) {
+    dropzone.addEventListener('click', (e) => {
+      if (e.target.closest('#asset-upload-progress')) return;
+      multiInput.click();
+    });
+
+    multiInput.addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files || []);
+      e.target.value = '';
+      if (files.length) await uploadMultipleAssets(files);
+    });
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+      dropzone.classList.add('asset-drop-active');
+    });
+
+    dropzone.addEventListener('dragleave', (e) => {
+      if (!dropzone.contains(e.relatedTarget)) {
+        dropzone.classList.remove('asset-drop-active');
+      }
+    });
+
+    dropzone.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('asset-drop-active');
+      const { files, skippedFolders } = extractDroppedFiles(e.dataTransfer);
+      if (skippedFolders > 0) {
+        showToast('Skipped OS folder drop — create folders here and drop files inside.', 'info');
+      }
+      if (files.length) await uploadMultipleAssets(files);
+    });
+  }
+
+  // Direct file drop onto individual subfolder cards
+  document.querySelectorAll('[data-drop-folder-id]').forEach((card) => {
+    card.addEventListener('dragover', (e) => {
+      if (!e.dataTransfer?.types?.includes('Files')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = 'copy';
+      card.classList.add('folder-drop-active');
+    });
+
+    card.addEventListener('dragleave', (e) => {
+      if (!card.contains(e.relatedTarget)) {
+        card.classList.remove('folder-drop-active');
+      }
+    });
+
+    card.addEventListener('drop', async (e) => {
+      if (!e.dataTransfer?.types?.includes('Files')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      card.classList.remove('folder-drop-active');
+      const targetFolderId = card.dataset.dropFolderId;
+      const { files, skippedFolders } = extractDroppedFiles(e.dataTransfer);
+      if (skippedFolders > 0) {
+        showToast('Skipped OS folder drop — drop files directly instead.', 'info');
+      }
+      if (files.length) await uploadMultipleAssets(files, targetFolderId);
+    });
+  });
 
   document.querySelectorAll('[data-asset-status-id]').forEach((sel) => {
     sel.addEventListener('change', async (e) => { await updateAssetStatus(e.target.dataset.assetStatusId, e.target.value); });

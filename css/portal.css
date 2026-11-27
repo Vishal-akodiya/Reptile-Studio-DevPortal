@@ -20,6 +20,17 @@
     background-color: rgba(16, 185, 129, 0.06) !important;
 }
 
+.asset-drop-active {
+    border-color: rgba(16, 185, 129, 0.85) !important;
+    background-color: rgba(16, 185, 129, 0.08) !important;
+}
+
+.folder-drop-active {
+    border-color: rgba(16, 185, 129, 0.9) !important;
+    background-color: rgba(16, 185, 129, 0.12) !important;
+    transform: scale(1.01);
+}
+
 @keyframes fadeSlideUp {
     from {
         opacity: 0;
