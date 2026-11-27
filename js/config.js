@@ -4,10 +4,9 @@ const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_sXGycE_FBouIbcK-OhTwXA_Y0Vwin10
 const LS_URL_KEY = 'reptile_sb_url';
 const LS_KEY_KEY = 'reptile_sb_key';
 
-// Storage limits (Supabase Free Plan: 50 MB max file, 1 GB total storage)
 const STORAGE_BUCKET = 'studio-media';
-const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;    // 50 MB
-const MAX_STORAGE_BYTES = 1024 * 1024 * 1024; // 1 GB (1024 MB)
+const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
+const MAX_STORAGE_BYTES = 1024 * 1024 * 1024;
 
 let sb = null;
 let authSubscription = null;
@@ -28,8 +27,11 @@ const db = {
     builds: [],
     docs: [],
     assets: [],
+    asset_folders: [],
+    announcements: [],
     comments: [],
     allowed_emails: [],
+    discord_webhooks: [],
     activity_logs: [],
     storage: { used_bytes: 0, file_count: 0, max_bytes: MAX_STORAGE_BYTES },
 };
@@ -49,6 +51,7 @@ const filters = {
     assetType: 'All',
     assetStatus: 'All',
     assetSearch: '',
+    currentFolderId: null,
     buildsTab: 'builds',
     docsCategory: 'All',
     myTasksShowDone: false,
@@ -62,8 +65,9 @@ const BUG_SEVERITIES = ['Blocker', 'High', 'Medium', 'Low'];
 const BUG_STATUSES = ['Open', 'In Progress', 'Fixed', 'Closed'];
 const BUILD_PLATFORMS = ['Windows', 'Android', 'WebGL', 'Linux', 'macOS'];
 const DOC_CATEGORIES = ['GDD', 'GitHub Repo', 'Art / 3D Assets', 'Audio', 'Design Ref', 'Other'];
-const ASSET_TYPES = ['3D Model', 'Texture / Shader', 'Audio / SFX', 'Animation', 'UI / Icon', 'VFX / Other'];
+const ASSET_TYPES = ['3D Model', 'Texture / Shader', 'Audio / SFX', 'Animation', 'UI / Icon', 'Script / Doc', 'VFX / Other'];
 const ASSET_STATUSES = ['Concept', 'Greybox', 'WIP', 'In-Engine', 'Final'];
+const ANNOUNCEMENT_CATEGORIES = ['General', 'Milestone', 'Urgent', 'Release'];
 
 function isHardcodedConfig() {
     const url = (SUPABASE_URL || '').trim();
@@ -156,6 +160,30 @@ function getProfileById(id) {
 
 function getProjectById(id) {
     return db.projects.find((p) => p.id === id) || null;
+}
+
+function getFolderById(id) {
+    return db.asset_folders.find((f) => f.id === id) || null;
+}
+
+function getFolderBreadcrumbChain(folderId) {
+    const chain = [];
+    const visited = new Set();
+    let cur = folderId ? getFolderById(folderId) : null;
+    while (cur && !visited.has(cur.id)) {
+        visited.add(cur.id);
+        chain.unshift(cur);
+        cur = cur.parent_id ? getFolderById(cur.parent_id) : null;
+    }
+    return chain;
+}
+
+function getFolderPathLabel(folderId) {
+    const chain = getFolderBreadcrumbChain(folderId);
+    if (!chain.length) return 'Root (No Folder)';
+    const proj = chain[0].project_id ? getProjectById(chain[0].project_id) : null;
+    const prefix = proj ? `${proj.name} / ` : 'General / ';
+    return prefix + chain.map((f) => f.name).join(' / ');
 }
 
 function refreshIcons() {

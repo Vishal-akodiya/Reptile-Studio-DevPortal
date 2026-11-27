@@ -9,23 +9,17 @@ async function logActivity(action, target) {
     if (error) console.error('[Reptile Studio] Activity log error:', error);
 }
 
-// --- Storage Helpers (50 MB Cap + 1 GB Usage Guard) ---
+// --- Storage Helpers ---
 function validateUploadFile(file) {
     if (!file) return { ok: false, message: 'No file selected.' };
     if (file.size > MAX_UPLOAD_BYTES) {
-        return {
-            ok: false,
-            message: `File is ${formatBytes(file.size)}. Maximum allowed upload is 50 MB.`,
-        };
+        return { ok: false, message: `File is ${formatBytes(file.size)}. Max upload size is 50 MB.` };
     }
     const used = Number(db.storage?.used_bytes) || 0;
     const max = Number(db.storage?.max_bytes) || MAX_STORAGE_BYTES;
     if (used + file.size > max) {
         const remaining = Math.max(0, max - used);
-        return {
-            ok: false,
-            message: `Not enough studio storage (${formatBytes(remaining)} left). Use an external link instead.`,
-        };
+        return { ok: false, message: `Not enough storage (${formatBytes(remaining)} left). Use an external link instead.` };
     }
     return { ok: true };
 }
@@ -102,16 +96,14 @@ function updateStorageMeterUI() {
         pctEl.textContent = `${pct}%`;
         pctEl.className = `font-mono ${txtColor}`;
     }
-    if (txtEl) {
-        txtEl.textContent = `${formatBytes(used)} / ${formatBytes(max)}`;
-    }
+    if (txtEl) txtEl.textContent = `${formatBytes(used)} / ${formatBytes(max)}`;
 }
 
 // --- Core Fetch & Realtime ---
 async function fetchAllData(showFeedback = false) {
     if (!sb) return;
     try {
-        const queries = [
+        const results = await Promise.all([
             sb.from('profiles').select('*').order('created_at', { ascending: true }),
             sb.from('projects').select('*').order('created_at', { ascending: false }),
             sb.from('tasks').select('*').order('created_at', { ascending: false }),
@@ -119,11 +111,12 @@ async function fetchAllData(showFeedback = false) {
             sb.from('builds').select('*').order('created_at', { ascending: false }),
             sb.from('docs').select('*').order('created_at', { ascending: false }),
             sb.from('assets').select('*').order('created_at', { ascending: false }),
+            sb.from('asset_folders').select('*').order('name', { ascending: true }),
+            sb.from('announcements').select('*').order('pinned', { ascending: false }).order('created_at', { ascending: false }),
             sb.from('comments').select('*').order('created_at', { ascending: true }),
             sb.from('activity_logs').select('*').order('created_at', { ascending: false }).limit(30),
-        ];
+        ]);
 
-        const results = await Promise.all(queries);
         for (const res of results) {
             if (res.error) throw res.error;
         }
@@ -135,8 +128,15 @@ async function fetchAllData(showFeedback = false) {
         db.builds = results[4].data || [];
         db.docs = results[5].data || [];
         db.assets = results[6].data || [];
-        db.comments = results[7].data || [];
-        db.activity_logs = results[8].data || [];
+        db.asset_folders = results[7].data || [];
+        db.announcements = results[8].data || [];
+        db.comments = results[9].data || [];
+        db.activity_logs = results[10].data || [];
+
+        // Reset currentFolderId if the folder was deleted
+        if (filters.currentFolderId && !getFolderById(filters.currentFolderId)) {
+            filters.currentFolderId = null;
+        }
 
         const refreshedMe = db.profiles.find((p) => p.id === currentSession?.user?.id);
         if (refreshedMe) {
@@ -148,8 +148,12 @@ async function fetchAllData(showFeedback = false) {
         }
 
         if (isAdmin()) {
-            const wlRes = await sb.from('allowed_emails').select('*').order('email', { ascending: true });
+            const [wlRes, whRes] = await Promise.all([
+                sb.from('allowed_emails').select('*').order('email', { ascending: true }),
+                sb.from('discord_webhooks').select('*').order('channel_key', { ascending: true }),
+            ]);
             if (!wlRes.error) db.allowed_emails = wlRes.data || [];
+            if (!whRes.error) db.discord_webhooks = whRes.data || [];
         }
 
         await refreshStorageUsage();
@@ -184,7 +188,10 @@ function subscribeRealtime() {
         realtimeChannel = null;
     }
 
-    const tables = ['profiles', 'projects', 'tasks', 'bugs', 'builds', 'docs', 'assets', 'comments', 'activity_logs'];
+    const tables = [
+        'profiles', 'projects', 'tasks', 'bugs', 'builds', 'docs',
+        'assets', 'asset_folders', 'announcements', 'comments', 'activity_logs',
+    ];
     realtimeChannel = sb.channel('reptile-studio-live');
 
     tables.forEach((table) => {
@@ -209,10 +216,12 @@ function updateNavCounts() {
     const tEl = document.getElementById('nav-count-tasks');
     const bEl = document.getElementById('nav-count-bugs');
     const aEl = document.getElementById('nav-count-assets');
+    const anEl = document.getElementById('nav-count-announcements');
     if (pEl) pEl.textContent = String(db.projects.length);
     if (tEl) tEl.textContent = String(db.tasks.filter((t) => t.status !== 'Done').length);
     if (bEl) bEl.textContent = String(db.bugs.filter((b) => b.status === 'Open' || b.status === 'In Progress').length);
     if (aEl) aEl.textContent = String(db.assets.length);
+    if (anEl) anEl.textContent = String(db.announcements.length);
 }
 
 // --- Projects ---
@@ -284,7 +293,7 @@ async function deleteTask(id, title) {
     await fetchAllData(false);
 }
 
-// --- Bugs (With Media Attachments) ---
+// --- Bugs ---
 async function saveBug(payload, id = null) {
     if (id) {
         const { error } = await sb.from('bugs').update(payload).eq('id', id);
@@ -292,10 +301,7 @@ async function saveBug(payload, id = null) {
         await logActivity('updated bug', payload.title);
         showToast('Bug updated', 'success');
     } else {
-        const { error } = await sb.from('bugs').insert({
-            ...payload,
-            reporter_id: currentProfile?.id || null,
-        });
+        const { error } = await sb.from('bugs').insert({ ...payload, reporter_id: currentProfile?.id || null });
         if (error) return showToast(`Bug report failed: ${error.message}`, 'error');
         await logActivity(`logged ${payload.severity.toLowerCase()} bug`, payload.title);
         showToast('Bug logged', 'success');
@@ -315,9 +321,7 @@ async function updateBugStatus(bugId, newStatus) {
 
 async function deleteBug(id, title) {
     const existing = db.bugs.find((b) => b.id === id);
-    if (existing?.media_path) {
-        await removeStudioFile(existing.media_path);
-    }
+    if (existing?.media_path) await removeStudioFile(existing.media_path);
     const { error } = await sb.from('bugs').delete().eq('id', id);
     if (error) return showToast(`Delete failed: ${error.message}`, 'error');
     await sb.from('comments').delete().eq('entity_type', 'bug').eq('entity_id', id);
@@ -326,7 +330,37 @@ async function deleteBug(id, title) {
     await fetchAllData(false);
 }
 
-// --- Assets Pipeline ---
+// --- Asset Folders (Nested) ---
+async function saveAssetFolder(payload, id = null) {
+    if (id) {
+        const { error } = await sb.from('asset_folders').update({ name: payload.name }).eq('id', id);
+        if (error) return showToast(`Rename failed: ${error.message}`, 'error');
+        await logActivity('renamed folder', payload.name);
+        showToast('Folder renamed', 'success');
+    } else {
+        const { error } = await sb.from('asset_folders').insert({
+            ...payload,
+            created_by: currentProfile?.id || null,
+        });
+        if (error) return showToast(`Folder create failed: ${error.message}`, 'error');
+        await logActivity('created folder', payload.name);
+        showToast('Folder created', 'success');
+    }
+    await fetchAllData(false);
+}
+
+async function deleteAssetFolder(id) {
+    const folder = getFolderById(id);
+    if (!folder) return;
+    const { error } = await sb.from('asset_folders').delete().eq('id', id);
+    if (error) return showToast(`Folder delete failed: ${error.message}`, 'error');
+    if (filters.currentFolderId === id) filters.currentFolderId = folder.parent_id || null;
+    await logActivity('deleted folder', folder.name);
+    showToast('Folder deleted (files moved to root)', 'success');
+    await fetchAllData(false);
+}
+
+// --- Assets ---
 async function saveAsset(payload, id = null) {
     if (id) {
         const { error } = await sb.from('assets').update(payload).eq('id', id);
@@ -334,10 +368,7 @@ async function saveAsset(payload, id = null) {
         await logActivity('updated asset', payload.name);
         showToast('Asset updated', 'success');
     } else {
-        const { error } = await sb.from('assets').insert({
-            ...payload,
-            uploader_id: currentProfile?.id || null,
-        });
+        const { error } = await sb.from('assets').insert({ ...payload, uploader_id: currentProfile?.id || null });
         if (error) return showToast(`Asset save failed: ${error.message}`, 'error');
         await logActivity('added asset', payload.name);
         showToast('Asset saved', 'success');
@@ -358,9 +389,7 @@ async function updateAssetStatus(assetId, newStatus) {
 async function deleteAssetById(id) {
     const asset = db.assets.find((a) => a.id === id);
     if (!asset) return;
-    if (asset.file_path) {
-        await removeStudioFile(asset.file_path);
-    }
+    if (asset.file_path) await removeStudioFile(asset.file_path);
     const { error } = await sb.from('assets').delete().eq('id', id);
     if (error) return showToast(`Delete failed: ${error.message}`, 'error');
     await logActivity('deleted asset', asset.name);
@@ -377,6 +406,55 @@ async function downloadAssetById(id) {
     } else if (asset.external_url) {
         window.open(safeUrl(asset.external_url), '_blank', 'noopener,noreferrer');
     }
+}
+
+// --- Announcements (Admin Only) ---
+async function saveAnnouncement(payload, id = null) {
+    if (id) {
+        const { error } = await sb.from('announcements').update(payload).eq('id', id);
+        if (error) return showToast(`Update failed: ${error.message}`, 'error');
+        await logActivity('updated announcement', payload.title);
+        showToast('Announcement updated', 'success');
+    } else {
+        const { error } = await sb.from('announcements').insert({ ...payload, author_id: currentProfile?.id || null });
+        if (error) return showToast(`Post failed: ${error.message}`, 'error');
+        await logActivity('posted announcement', payload.title);
+        showToast('Announcement published', 'success');
+    }
+    await fetchAllData(false);
+}
+
+async function toggleAnnouncementPin(id, currentPinned) {
+    const { error } = await sb.from('announcements').update({ pinned: !currentPinned }).eq('id', id);
+    if (error) return showToast(`Pin failed: ${error.message}`, 'error');
+    showToast(!currentPinned ? 'Pinned to top' : 'Unpinned', 'success');
+    await fetchAllData(false);
+}
+
+async function deleteAnnouncementById(id) {
+    const an = db.announcements.find((a) => a.id === id);
+    const { error } = await sb.from('announcements').delete().eq('id', id);
+    if (error) return showToast(`Delete failed: ${error.message}`, 'error');
+    if (an) await logActivity('deleted announcement', an.title);
+    showToast('Announcement deleted', 'success');
+    await fetchAllData(false);
+}
+
+// --- Discord Webhooks (Admin Only) ---
+async function saveDiscordWebhook(channelKey, webhookUrl, enabled) {
+    const { error } = await sb
+        .from('discord_webhooks')
+        .update({ webhook_url: webhookUrl.trim(), enabled: Boolean(enabled), updated_at: new Date().toISOString() })
+        .eq('channel_key', channelKey);
+    if (error) return showToast(`Webhook save failed: ${error.message}`, 'error');
+    showToast('Discord webhook saved', 'success');
+    await fetchAllData(false);
+}
+
+async function runTestDiscordWebhook(channelKey) {
+    const { error } = await sb.rpc('test_discord_webhook', { p_channel_key: channelKey });
+    if (error) return showToast(`Test failed: ${error.message}`, 'error');
+    showToast('Test notification sent to Discord!', 'success');
 }
 
 // --- Comments ---
@@ -397,7 +475,7 @@ async function addComment(entityType, entityId, body) {
     return true;
 }
 
-// --- Builds & Docs ---
+// --- Builds, Docs, Profiles, Whitelist ---
 async function saveBuild(payload) {
     const { error } = await sb.from('builds').insert(payload);
     if (error) return showToast(`Build save failed: ${error.message}`, 'error');
@@ -435,7 +513,6 @@ async function deleteDocById(id) {
     await fetchAllData(false);
 }
 
-// --- Profiles & Admin Whitelist ---
 async function updateMemberProfile(id, payload) {
     const { error } = await sb.from('profiles').update(payload).eq('id', id);
     if (error) return showToast(`Profile update failed: ${error.message}`, 'error');
